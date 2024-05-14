@@ -11,8 +11,7 @@
     <div class="container mx-auto py-10">
          <div class="p-8">
             <h1 class="text-3xl font-bold text-center text-white flex items-center justify-center mb-6">
-                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify"
-                    class="w-8 h-8 mr-2">
+                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                 Spotify
             </h1>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
@@ -108,32 +107,22 @@
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
             const audio = document.getElementById('previewAudio');
             audio.src = song.url;
-            audio.load(); // Ensure the audio is loaded before playing
-
-            audio.play().catch(error => {
-                if (error.name === 'AbortError') {
-                    console.warn('Play request was interrupted: ', error);
-                } else {
-                    console.error('Error playing audio: ', error);
-                }
-            });
-
             document.getElementById('previewDownload').href = song.url;
+
+            // Memastikan play tidak konflik dengan pause
+            audio.play().catch(error => {
+                console.error('Terjadi kesalahan saat memutar audio:', error);
+            });
 
             // Auto download on click
             document.getElementById('previewDownload').onclick = function(event) {
                 event.preventDefault();
-                fetch(song.url)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const downloadLink = document.createElement('a');
-                        downloadLink.href = URL.createObjectURL(blob);
-                        downloadLink.download = `${song.title}.mp3`;
-                        document.body.appendChild(downloadLink);
-                        downloadLink.click();
-                        document.body.removeChild(downloadLink);
-                    })
-                    .catch(error => console.error('Error downloading the song:', error));
+                const downloadLink = document.createElement('a');
+                downloadLink.href = song.url;
+                downloadLink.download = `${song.title}.mp3`;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
             };
         }
 
@@ -141,9 +130,8 @@
             const modal = document.getElementById('previewModal');
             modal.classList.add('hidden');
             const audio = document.getElementById('previewAudio');
-            audio.pause(); // Ensure the audio is paused when closing the modal
+            audio.pause(); // Hentikan audio saat menutup modal
         }
     </script>
 </body>
 </html>
-
