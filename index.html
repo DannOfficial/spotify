@@ -1,3 +1,6 @@
+<!-- DannTeam || Spotify Search -->
+<!-- www.spotify.dannteam.com -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +12,7 @@
 </head>
 <body class="bg-gray-200">
     <div class="container mx-auto py-10">
-        <div class="p-8">
+         <div class="p-8">
             <h1 class="text-3xl font-bold text-center text-white flex items-center justify-center mb-6">
                 <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify"
                     class="w-8 h-8 mr-2">
@@ -23,7 +26,7 @@
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
             </div>
             <div id="results" class="mt-5"></div>
-        </div>
+         </div>
     </div>
 
     <!-- Preview Modal -->
@@ -35,13 +38,12 @@
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
                 <p id="previewAlbum" class="text-gray-700 mb-4"></p>
                 <audio id="previewAudio" controls class="w-full mb-4"></audio>
-                <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4"><i class="fas fa-download"></i> Download</a>
+                <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4">Download</a>
                 <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-times"></i></button>
             </div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/jsdom@24.0.0/lib/api.min.js"></script>
     <script>
         function search() {
             const query = document.getElementById('searchInput').value;
@@ -107,33 +109,13 @@
             document.getElementById('previewTitle').textContent = song.title;
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
-            const audio = document.getElementById('previewAudio');
-            audio.src = song.url;
-            audio.load(); // Ensure the audio is loaded before attempting to play
-            audio.play().catch(error => {
-                console.error('Error playing audio:', error);
-            });
-
+            document.getElementById('previewAudio').src = song.url;
             document.getElementById('previewDownload').href = song.url;
-
-            // Auto download on click
-            document.getElementById('previewDownload').onclick = function(event) {
-                event.preventDefault();
-                const downloadLink = document.createElement('a');
-                downloadLink.href = song.url;
-                downloadLink.download = `${song.title}.mp3`;
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            };
         }
 
         function closePreview() {
             const modal = document.getElementById('previewModal');
             modal.classList.add('hidden');
-            const audio = document.getElementById('previewAudio');
-            audio.pause();
-            audio.currentTime = 0;
         }
     </script>
 </body>
