@@ -9,9 +9,10 @@
 </head>
 <body class="bg-gray-200">
     <div class="container mx-auto py-10">
-         <div class="p-8">
+        <div class="p-8">
             <h1 class="text-3xl font-bold text-center text-white flex items-center justify-center mb-6">
-                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
+                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify"
+                    class="w-8 h-8 mr-2">
                 Spotify
             </h1>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
@@ -22,7 +23,7 @@
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
             </div>
             <div id="results" class="mt-5"></div>
-         </div>
+        </div>
     </div>
 
     <!-- Preview Modal -->
@@ -40,6 +41,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/jsdom@24.0.0/lib/api.min.js"></script>
     <script>
         function search() {
             const query = document.getElementById('searchInput').value;
@@ -107,12 +109,12 @@
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
             const audio = document.getElementById('previewAudio');
             audio.src = song.url;
-            document.getElementById('previewDownload').href = song.url;
-
-            // Memastikan play tidak konflik dengan pause
+            audio.load(); // Ensure the audio is loaded before attempting to play
             audio.play().catch(error => {
-                console.error('Terjadi kesalahan saat memutar audio:', error);
+                console.error('Error playing audio:', error);
             });
+
+            document.getElementById('previewDownload').href = song.url;
 
             // Auto download on click
             document.getElementById('previewDownload').onclick = function(event) {
@@ -130,7 +132,8 @@
             const modal = document.getElementById('previewModal');
             modal.classList.add('hidden');
             const audio = document.getElementById('previewAudio');
-            audio.pause(); // Hentikan audio saat menutup modal
+            audio.pause();
+            audio.currentTime = 0;
         }
     </script>
 </body>
