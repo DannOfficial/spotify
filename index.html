@@ -37,9 +37,15 @@
                 <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
                 <p id="previewAlbum" class="text-gray-700 mb-4"></p>
-                <audio id="previewAudio" controls class="w-full mb-4"></audio>
-                <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4">Download</a>
-                <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-times"></i></button>
+                <audio controls class="w-full mb-4">
+                    <source id="previewAudio" src="" type="audio/mp3">
+                </audio>
+                <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -84,7 +90,7 @@
                         songInfo.appendChild(album);
 
                         const previewBtn = document.createElement('button');
-                        previewBtn.textContent = 'Preview';
+                        previewBtn.innerHTML = '<i class="fas fa-play"></i> Preview';
                         previewBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300', 'mr-4');
                         previewBtn.onclick = function() {
                             openPreview(song);
