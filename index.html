@@ -1,5 +1,4 @@
-<!-- DannTeam || Spotify Search -->
-<!-- www.spotify.dannteam.my.id -->
+<!-- www.spotify.dannteam.com -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,7 +36,9 @@
                 <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
                 <p id="previewAlbum" class="text-gray-700 mb-4"></p>
-                <audio id="previewAudio" controls class="w-full mb-4"></audio>
+                <audio controls class="w-full mb-4">
+source src="" audio/mp3
+</audio>
                 <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4">Download</a>
                 <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-times"></i></button>
             </div>
@@ -109,89 +110,8 @@
             document.getElementById('previewTitle').textContent = song.title;
             document.getElementById('previewArtist').textContent = Artist: ${song.artist};
             document.getElementById('previewAlbum').textContent = Album: ${song.album};
-            document.getElementById('previewAudio').src = song.preview_mp3;
-            document.getElementById('previewDownload').href = song.preview_mp3;
-        }
-
-        function closePreview() {
-            const modal = document.getElementById('previewModal');
-            modal.classList.add('hidden');
-        }
-    </script>
-</body>
-</html>
-
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function search() {
-            const query = document.getElementById('searchInput').value;
-            const url = https://spotifyapi.caliphdev.com/api/search/tracks?q=${encodeURIComponent(query)};
-
-            document.getElementById('loader').classList.remove('hidden');
-
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('loader').classList.add('hidden');
-                    const resultsDiv = document.getElementById('results');
-                    resultsDiv.innerHTML = '';
-
-                    data.forEach(song => {
-                        const resultItem = document.createElement('div');
-                        resultItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4');
-
-                        const thumbnail = document.createElement('img');
-                        thumbnail.src = song.thumbnail;
-                        thumbnail.classList.add('w-24', 'h-24', 'mr-4');
-                        resultItem.appendChild(thumbnail);
-
-                        const songInfo = document.createElement('div');
-                        const title = document.createElement('h3');
-                        title.textContent = song.title;
-                        title.classList.add('text-lg', 'font-bold', 'mb-1');
-                        songInfo.appendChild(title);
-
-                        const artist = document.createElement('p');
-                        artist.textContent = Artist: ${song.artist};
-                        artist.classList.add('text-gray-700', 'mb-1');
-                        songInfo.appendChild(artist);
-
-                        const album = document.createElement('p');
-                        album.textContent = Album: ${song.album};
-                        album.classList.add('text-gray-700', 'mb-1');
-                        songInfo.appendChild(album);
-
-                        const previewBtn = document.createElement('button');
-                        previewBtn.textContent = 'Preview';
-                        previewBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300', 'mr-4');
-                        previewBtn.onclick = function() {
-                            openPreview(song);
-                        };
-                        songInfo.appendChild(previewBtn);
-
-                        resultItem.appendChild(songInfo);
-                        resultsDiv.appendChild(resultItem);
-                    });
-                })
-                .catch(error => {
-                    document.getElementById('loader').classList.add('hidden');
-                    console.error('Terjadi kesalahan:', error);
-                });
-        }
-
-        function openPreview(song) {
-            const modal = document.getElementById('previewModal');
-            modal.classList.remove('hidden');
-
-            document.getElementById('previewThumbnail').src = song.thumbnail;
-            document.getElementById('previewTitle').textContent = song.title;
-            document.getElementById('previewArtist').textContent = Artist: ${song.artist};
-            document.getElementById('previewAlbum').textContent = Album: ${song.album};
-            document.getElementById('previewAudio').src = song.preview_mp3;
-            document.getElementById('previewDownload').href = song.preview_mp3;
+            document.getElementById('previewAudio').src = song.url;
+            document.getElementById('previewDownload').href = song.url;
         }
 
         function closePreview() {
