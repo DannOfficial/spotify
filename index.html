@@ -9,7 +9,7 @@
 </head>
 <body class="bg-gray-200">
     <div class="container mx-auto py-10">
-        <div class="p-8">
+         <div class="p-8">
             <h1 class="text-3xl font-bold text-center text-white flex items-center justify-center mb-6">
                 <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify"
                     class="w-8 h-8 mr-2">
@@ -23,7 +23,7 @@
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
             </div>
             <div id="results" class="mt-5"></div>
-        </div>
+         </div>
     </div>
 
     <!-- Preview Modal -->
@@ -34,13 +34,16 @@
                 <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
                 <p id="previewAlbum" class="text-gray-700 mb-4"></p>
-                <audio id="previewAudio" controls class="w-full mb-4">
-                    <source id="audioSource" src="" type="audio/mp3">
+                <audio controls class="w-full mb-4">
+                    <source id="previewAudio" src="" type="audio/mpeg">
+                    Your browser does not support the audio element.
                 </audio>
                 <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4">
                     <i class="fas fa-download"></i> Download
                 </a>
-                <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-times"></i></button>
+                <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-500 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </div>
     </div>
@@ -92,11 +95,12 @@
                         };
                         songInfo.appendChild(previewBtn);
 
-                        const downloadBtn = document.createElement('a');
+                        const downloadBtn = document.createElement('button');
                         downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
-                        downloadBtn.href = song.url;
-                        downloadBtn.download = true;
                         downloadBtn.classList.add('bg-green-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-green-600', 'focus:outline-none', 'focus:ring', 'focus:border-green-300');
+                        downloadBtn.onclick = function() {
+                            autoDownload(song.url);
+                        };
                         songInfo.appendChild(downloadBtn);
 
                         resultItem.appendChild(songInfo);
@@ -117,14 +121,22 @@
             document.getElementById('previewTitle').textContent = song.title;
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
-            document.getElementById('audioSource').src = song.url;
-            document.getElementById('previewAudio').load(); // Reload the audio element
+            document.getElementById('previewAudio').src = song.url;
             document.getElementById('previewDownload').href = song.url;
         }
 
         function closePreview() {
             const modal = document.getElementById('previewModal');
             modal.classList.add('hidden');
+        }
+
+        function autoDownload(url) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = '';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
