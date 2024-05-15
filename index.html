@@ -53,7 +53,7 @@
 
         function search() {
             const query = document.getElementById('searchInput').value;
-            const url = `https://spotifyapi.caliphdev.com/api/search/tracks?q=${encodeURIComponent(query)}`;
+           const url = 'https://spotifyapi.caliphdev.com/api/search/tracks?q=' + encodeURIComponent(query);
 
             document.getElementById('loader').classList.remove('hidden');
 
