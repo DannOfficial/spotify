@@ -9,21 +9,22 @@
 </head>
 <body class="bg-gray-200">
     <div class="container mx-auto py-10">
-        <div class="p-8">
+         <div class="p-8">
             <h1 class="text-3xl font-bold text-center text-white flex items-center justify-center mb-6">
-                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify"
-                    class="w-8 h-8 mr-2">
+                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                 Spotify
             </h1>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
                 <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300">
-                <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-search"></i></button>
+                <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
             <div id="loader" class="hidden flex items-center justify-center mt-5">
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
             </div>
             <div id="results" class="mt-5"></div>
-        </div>
+         </div>
     </div>
 
     <!-- Preview Modal -->
@@ -34,13 +35,13 @@
                 <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
                 <p id="previewAlbum" class="text-gray-700 mb-4"></p>
-                <audio controls class="w-full mb-4" id="previewAudio">
-                    <source src="" type="audio/mp3">
+                <audio id="previewAudio" controls class="w-full mb-4">
+                    <source id="audioSource" src="" type="audio/mp3">
                 </audio>
                 <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4">
                     <i class="fas fa-download"></i> Download
                 </a>
-                <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+                <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -87,12 +88,23 @@
                         songInfo.appendChild(album);
 
                         const previewBtn = document.createElement('button');
-                        previewBtn.innerHTML = '<i class="fas fa-play"></i> Preview';
+                        previewBtn.innerHTML = '<i class="fas fa-eye"></i> Preview';
                         previewBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300', 'mr-4');
                         previewBtn.onclick = function() {
-                            openPreview(song);
+                            showLoader();
+                            setTimeout(() => {
+                                hideLoader();
+                                openPreview(song);
+                            }, 2000);
                         };
                         songInfo.appendChild(previewBtn);
+
+                        const downloadBtn = document.createElement('a');
+                        downloadBtn.href = song.url;
+                        downloadBtn.download = '';
+                        downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+                        downloadBtn.classList.add('bg-green-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-green-600', 'focus:outline-none', 'focus:ring', 'focus:border-green-300');
+                        songInfo.appendChild(downloadBtn);
 
                         resultItem.appendChild(songInfo);
                         resultsDiv.appendChild(resultItem);
@@ -104,6 +116,14 @@
                 });
         }
 
+        function showLoader() {
+            document.getElementById('loader').classList.remove('hidden');
+        }
+
+        function hideLoader() {
+            document.getElementById('loader').classList.add('hidden');
+        }
+
         function openPreview(song) {
             const modal = document.getElementById('previewModal');
             modal.classList.remove('hidden');
@@ -112,8 +132,11 @@
             document.getElementById('previewTitle').textContent = song.title;
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
-            document.getElementById('previewAudio').src = song.url;
+            document.getElementById('audioSource').src = song.url;
             document.getElementById('previewDownload').href = song.url;
+
+            const audioElement = document.getElementById('previewAudio');
+            audioElement.load();
         }
 
         function closePreview() {
@@ -123,4 +146,3 @@
     </script>
 </body>
 </html>
-
