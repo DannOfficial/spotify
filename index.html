@@ -114,7 +114,7 @@
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
             document.getElementById('audioSource').src = song.url;
-            document.getElementById('previewAudio').load();
+            document.getElementById('previewAudio').play();
             document.getElementById('previewDownload').href = song.url;
         }
 
