@@ -57,7 +57,14 @@
 
             document.getElementById('loader').classList.remove('hidden');
 
-            fetch(url)
+            fetch(url, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                },
+            })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('loader').classList.add('hidden');
