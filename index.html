@@ -49,6 +49,8 @@
     </div>
 
     <script>
+        let currentAudio = null;
+
         function search() {
             const query = document.getElementById('searchInput').value;
             const url = `https://spotifyapi.caliphdev.com/api/search/tracks?q=${encodeURIComponent(query)}`;
@@ -114,13 +116,29 @@
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
             document.getElementById('audioSource').src = song.url;
-            document.getElementById('previewAudio').play();
+
+            if (currentAudio) {
+                currentAudio.pause();
+            }
+
+            const previewAudio = document.getElementById('previewAudio');
+            previewAudio.load(); // Load the new source
+            previewAudio.play().then(() => {
+                currentAudio = previewAudio;
+            }).catch(error => {
+                console.error('Error playing audio:', error);
+            });
+
             document.getElementById('previewDownload').href = song.url;
         }
 
         function closePreview() {
             const modal = document.getElementById('previewModal');
             modal.classList.add('hidden');
+
+            if (currentAudio) {
+                currentAudio.pause();
+            }
         }
     </script>
 </body>
