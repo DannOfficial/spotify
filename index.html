@@ -57,17 +57,7 @@
 
             document.getElementById('loader').classList.remove('hidden');
 
-              fetch(url, {
-                method: 'GET',
-                headers: new Headers({
-                  'Content-Type': 'application/json',
-                  'Access-Control-Allow-Origin': '*',
-                  'Access-Control-Allow-Credentials': 'true'
-                }),
-                mode: 'cors',
-                cache: 'no-cache',
-                credentials: 'same-origin'
-              })
+              fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('loader').classList.add('hidden');
@@ -125,7 +115,10 @@
             document.getElementById('previewTitle').textContent = song.title;
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
-            document.getElementById('audioSource').src = song.url;
+
+            // Perbarui URL audio dengan menyusunnya dari sumber yang diizinkan
+            const url = 'https://open.spotify.com/track/' + song.id;  // Mengganti song.url dengan song.id atau sumber lain yang diizinkan
+            document.getElementById('audioSource').src = url;
 
             if (currentAudio) {
                 currentAudio.pause();
@@ -139,7 +132,7 @@
                 console.error('Error playing audio:', error);
             });
 
-            document.getElementById('previewDownload').href = song.url;
+            document.getElementById('previewDownload').href = url;
         }
 
         function closePreview() {
