@@ -57,14 +57,17 @@
 
             document.getElementById('loader').classList.remove('hidden');
 
-            fetch(url, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
-                    'Access-Control-Allow-Headers': 'Content-Type',
-                },
-            })
+              fetch(url, {
+                method: 'GET',
+                headers: new Headers({
+                  'Content-Type': 'application/json',
+                  'Access-Control-Allow-Origin': '*',
+                  'Access-Control-Allow-Credentials': 'true'
+                }),
+                mode: 'cors',
+                cache: 'no-cache',
+                credentials: 'same-origin'
+              })
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('loader').classList.add('hidden');
