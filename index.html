@@ -16,20 +16,13 @@
                     <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                     Spotify
                 </h1>
-                <div class="relative">
-                    <button id="themeToggle" class="text-2xl focus:outline-none">
+                <div class="flex items-center">
+                    <button id="themeToggle" class="text-2xl focus:outline-none mr-4">
                         <i id="themeIcon" class="fas fa-moon"></i>
                     </button>
-                    <button id="logsToggle" class="text-2xl ml-4 focus:outline-none">
-                        <i class="fas fa-comments"></i>
+                    <button onclick="openLogModal()" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none">
+                        Logs
                     </button>
-                    <div id="chatLogs" class="absolute top-12 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-4 w-64 h-64 overflow-y-auto hidden">
-                        <div id="chatContainer" class="space-y-2"></div>
-                        <div class="flex mt-2">
-                            <input type="text" id="chatInput" placeholder="Type a message..." class="flex-grow border border-gray-300 px-2 py-1 rounded-l-md focus:outline-none dark:bg-gray-600 dark:text-white">
-                            <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-1 rounded-r-md hover:bg-blue-600 focus:outline-none"><i class="fas fa-paper-plane"></i></button>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
@@ -46,22 +39,13 @@
         </div>
     </div>
 
-    <!-- Preview Modal -->
-    <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
-        <div class="container mx-auto h-full flex items-center justify-center">
-            <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
-                <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
-                <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
-                <p id="previewArtist" class="text-gray-700 mb-2"></p>
-                <p id="previewAlbum" class="text-gray-700 mb-4"></p>
-                <div id="previewAudioContainer"></div>
-                <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-2">
-                    <i class="fas fa-download"></i> Download
-                </a>
-                <button onclick="saveToFavorites()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-blue-300">
-                    <i class="fas fa-save"></i> Save
-                </button>
-                <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+    <!-- Log Modal -->
+    <div id="logModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
+        <div class="container mx-auto h-full flex items-center justify-end">
+            <div class="bg-white p-4 rounded-lg relative w-1/3 h-full dark:bg-gray-700 overflow-y-auto">
+                <h3 class="text-lg font-bold mb-4">Chat Logs</h3>
+                <div id="chatLogs" class="space-y-4"></div>
+                <button onclick="closeLogModal()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -248,6 +232,55 @@
             }
         }
 
+        function openLogModal() {
+            const modal = document.getElementById('logModal');
+            modal.classList.remove('hidden');
+            fetchChatLogs();
+        }
+
+        function closeLogModal() {
+            const modal = document.getElementById('logModal');
+            modal.classList.add('hidden');
+        }
+
+        function fetchChatLogs() {
+            const url = 'https://tools.revesery.com/ai/ai.php?query=';
+            axios.get(url)
+                .then(response => {
+                    const chatLogsDiv = document.getElementById('chatLogs');
+                    chatLogsDiv.innerHTML = '';
+
+                    response.data.forEach(log => {
+                        const logItem = document.createElement('div');
+                        logItem.classList.add('flex', 'items-start', 'space-x-2');
+
+                        const thumbnail = document.createElement('img');
+                        thumbnail.src = log.avatar;
+                        thumbnail.classList.add('w-8', 'h-8', 'rounded-full');
+                        logItem.appendChild(thumbnail);
+
+                        const chatContent = document.createElement('div');
+                        chatContent.classList.add('flex-1', 'bg-gray-100', 'dark:bg-gray-800', 'p-2', 'rounded-lg');
+
+                        const userName = document.createElement('h4');
+                        userName.textContent = log.user;
+                        userName.classList.add('font-bold', 'mb-1');
+                        chatContent.appendChild(userName);
+
+                        const chatMessage = document.createElement('p');
+                        chatMessage.textContent = log.message;
+                        chatMessage.classList.add('text-sm');
+                        chatContent.appendChild(chatMessage);
+
+                        logItem.appendChild(chatContent);
+                        chatLogsDiv.appendChild(logItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching chat logs:', error);
+                });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             displayFavorites();
 
@@ -274,35 +307,7 @@
                     localStorage.setItem('theme', 'light');
                 }
             };
-
-            const logsToggle = document.getElementById('logsToggle');
-            const chatLogs = document.getElementById('chatLogs');
-            
-            logsToggle.onclick = function() {
-                chatLogs.classList.toggle('hidden');
-            };
         });
-
-        function sendMessage() {
-            const chatContainer = document.getElementById('chatContainer');
-            const chatInput = document.getElementById('chatInput');
-            const message = chatInput.value.trim();
-            if (message) {
-                const userMessage = document.createElement('div');
-                userMessage.classList.add('text-right', 'bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded-lg', 'inline-block', 'mb-2');
-                userMessage.textContent = message;
-                chatContainer.appendChild(userMessage);
-
-                // Simulate AI bot response
-                const botMessage = document.createElement('div');
-                botMessage.classList.add('text-left', 'bg-gray-300', 'text-gray-900', 'px-4', 'py-2', 'rounded-lg', 'inline-block', 'mb-2', 'dark:bg-gray-600', 'dark:text-white');
-                botMessage.textContent = "Bot response to: " + message;
-                chatContainer.appendChild(botMessage);
-
-                chatInput.value = '';
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
-        }
     </script>
 </body>
 </html>
