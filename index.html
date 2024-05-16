@@ -8,30 +8,36 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
-<body class="bg-gray-200">
+<body class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white">
     <div class="container mx-auto py-10">
         <div class="p-8">
-            <h1 class="text-3xl font-bold text-center text-white flex items-center justify-center mb-6">
-                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
-                Spotify
-            </h1>
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-center flex items-center justify-center">
+                    <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
+                    Spotify
+                </h1>
+                <button id="themeToggle" class="text-2xl focus:outline-none">
+                    <i id="themeIcon" class="fas fa-moon"></i>
+                </button>
+            </div>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
-                <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300">
+                <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
                 <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-search"></i></button>
             </div>
             <div id="loader" class="hidden flex items-center justify-center mt-5">
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
             </div>
             <div id="results" class="mt-5"></div>
-            <h2 class="text-2xl font-bold text-white mt-10">List Favorite</h2>
+            <h2 class="text-2xl font-bold mt-10">List Favorite</h2>
             <div id="favorites" class="mt-5"></div>
+            <div id="pagination" class="flex justify-center mt-5"></div>
         </div>
     </div>
 
     <!-- Preview Modal -->
     <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
         <div class="container mx-auto h-full flex items-center justify-center">
-            <div class="bg-white p-8 rounded-lg relative w-full max-w-lg">
+            <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
                 <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
                 <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
@@ -53,6 +59,8 @@
     <script>
         let currentSong = null;
         let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
+        const itemsPerPage = 5;
+        let currentPage = 1;
 
         function search() {
             const query = document.getElementById('searchInput').value;
@@ -68,7 +76,7 @@
 
                     response.data.forEach(song => {
                         const resultItem = document.createElement('div');
-                        resultItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4');
+                        resultItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
 
                         const thumbnail = document.createElement('img');
                         thumbnail.src = song.thumbnail;
@@ -83,12 +91,12 @@
 
                         const artist = document.createElement('p');
                         artist.textContent = `Artist: ${song.artist}`;
-                        artist.classList.add('text-gray-700', 'mb-1');
+                        artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
                         songInfo.appendChild(artist);
 
                         const album = document.createElement('p');
                         album.textContent = `Album: ${song.album}`;
-                        album.classList.add('text-gray-700', 'mb-1');
+                        album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
                         songInfo.appendChild(album);
 
                         const previewBtn = document.createElement('button');
@@ -148,9 +156,13 @@
             const favoritesDiv = document.getElementById('favorites');
             favoritesDiv.innerHTML = '';
 
-            favoriteSongs.forEach((song, index) => {
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const currentFavorites = favoriteSongs.slice(start, end);
+
+            currentFavorites.forEach((song, index) => {
                 const favoriteItem = document.createElement('div');
-                favoriteItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4');
+                favoriteItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
 
                 const thumbnail = document.createElement('img');
                 thumbnail.src = song.thumbnail;
@@ -165,25 +177,35 @@
 
                 const artist = document.createElement('p');
                 artist.textContent = `Artist: ${song.artist}`;
-                artist.classList.add('text-gray-700', 'mb-1');
+                artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
                 songInfo.appendChild(artist);
 
                 const album = document.createElement('p');
                 album.textContent = `Album: ${song.album}`;
-                album.classList.add('text-gray-700', 'mb-1');
+                album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
                 songInfo.appendChild(album);
+
+                const playBtn = document.createElement('button');
+                playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                playBtn.classList.add('bg-green-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-green-600', 'focus:outline-none', 'focus:ring', 'focus:border-green-300', 'mr-2');
+                playBtn.onclick = function() {
+                    openPreview(song);
+                };
+                songInfo.appendChild(playBtn);
 
                 const removeBtn = document.createElement('button');
                 removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
                 removeBtn.classList.add('bg-red-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring', 'focus:border-red-300');
                 removeBtn.onclick = function() {
-                    removeFromFavorites(index);
+                    removeFromFavorites(start + index);
                 };
                 songInfo.appendChild(removeBtn);
 
                 favoriteItem.appendChild(songInfo);
                 favoritesDiv.appendChild(favoriteItem);
             });
+
+            renderPagination();
         }
 
         function removeFromFavorites(index) {
@@ -192,8 +214,54 @@
             displayFavorites();
         }
 
+        function renderPagination() {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+
+            const totalPages = Math.ceil(favoriteSongs.length / itemsPerPage);
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.classList.add('mx-1', 'px-3', 'py-1', 'rounded', 'border', 'focus:outline-none', 'focus:ring');
+                if (i === currentPage) {
+                    pageBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                } else {
+                    pageBtn.classList.add('bg-white', 'text-gray-900', 'dark:bg-gray-700', 'dark:text-white');
+                    pageBtn.onclick = function() {
+                        currentPage = i;
+                        displayFavorites();
+                    };
+                }
+                paginationDiv.appendChild(pageBtn);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             displayFavorites();
+
+            const themeToggle = document.getElementById('themeToggle');
+            const themeIcon = document.getElementById('themeIcon');
+            const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const currentTheme = localStorage.getItem('theme') || (userPrefersDark ? 'dark' : 'light');
+
+            if (currentTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            }
+
+            themeToggle.onclick = function() {
+                document.documentElement.classList.toggle('dark');
+                if (document.documentElement.classList.contains('dark')) {
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                    localStorage.setItem('theme', 'light');
+                }
+            };
         });
     </script>
 </body>
