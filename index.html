@@ -8,17 +8,40 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
+        @keyframes border-animation {
+            0% {
+                border-color: red;
+            }
+            25% {
+                border-color: orange;
+            }
+            50% {
+                border-color: yellow;
+            }
+            75% {
+                border-color: green;
+            }
+            100% {
+                border-color: blue;
+            }
+        }
+
         .input-animation {
             position: relative;
+            display: flex;
         }
 
         .input-animation input {
             transition: all 0.2s ease;
             padding-right: 2.5rem;
+            border: 2px solid transparent;
+            animation: border-animation 2s linear infinite;
         }
 
         .input-animation input:focus {
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-color: transparent;
+            animation: none;
         }
 
         .input-animation button {
@@ -26,6 +49,12 @@
             right: 0.5rem;
             top: 50%;
             transform: translateY(-50%);
+        }
+
+        .chat-loader {
+            content: '...';
+            display: inline-block;
+            margin-left: 8px;
         }
     </style>
 </head>
@@ -71,10 +100,13 @@
                     <button onclick="clearChat()" class="text-red-500"><i class="fas fa-trash"></i></button>
                 </div>
                 <div id="chatLogs" class="overflow-y-auto h-64 mb-4"></div>
-                <div class="relative flex">
+                <div class="relative flex input-animation">
                     <input id="chatInput" type="text" class="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white" placeholder="Type a message...">
                     <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
                         <i class="fas fa-paper-plane"></i>
+                    </button>
+                    <button onclick="clearChat()" class="bg-red-500 text-white px-4 py-2 rounded-r-md hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300 ml-2">
+                        <i class="fas fa-trash"></i>
                     </button>
                 </div>
                 <button onclick="closeChat()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 dark:text-gray-200 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
@@ -115,13 +147,25 @@
             if (message) {
                 addChatMessage('user', message);
                 chatInput.value = '';
-                axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(message)}`)
-                    .then(response => {
-                        addChatMessage('bot', response.data);
-                    })
-                    .catch(error => {
-                        console.error('Error fetching AI response:', error);
-                    });
+                
+                const chatLoader = document.createElement('span');
+                chatLoader.classList.add('chat-loader');
+                chatLogs.appendChild(chatLoader);
+
+                axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(message)}`, {
+                    headers: {
+                        'Accept': '*/*',
+                        'X-Request-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    chatLogs.removeChild(chatLoader);
+                    addChatMessage('bot', response.data.response);
+                })
+                .catch(error => {
+                    chatLogs.removeChild(chatLoader);
+                    console.error('Error fetching AI response:', error);
+                });
             }
         }
 
