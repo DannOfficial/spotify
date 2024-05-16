@@ -16,9 +16,21 @@
                     <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                     Spotify
                 </h1>
-                <button id="themeToggle" class="text-2xl focus:outline-none">
-                    <i id="themeIcon" class="fas fa-moon"></i>
-                </button>
+                <div class="relative">
+                    <button id="themeToggle" class="text-2xl focus:outline-none">
+                        <i id="themeIcon" class="fas fa-moon"></i>
+                    </button>
+                    <button id="logsToggle" class="text-2xl ml-4 focus:outline-none">
+                        <i class="fas fa-comments"></i>
+                    </button>
+                    <div id="chatLogs" class="absolute top-12 right-0 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-4 w-64 h-64 overflow-y-auto hidden">
+                        <div id="chatContainer" class="space-y-2"></div>
+                        <div class="flex mt-2">
+                            <input type="text" id="chatInput" placeholder="Type a message..." class="flex-grow border border-gray-300 px-2 py-1 rounded-l-md focus:outline-none dark:bg-gray-600 dark:text-white">
+                            <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-1 rounded-r-md hover:bg-blue-600 focus:outline-none"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
                 <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
@@ -262,7 +274,35 @@
                     localStorage.setItem('theme', 'light');
                 }
             };
+
+            const logsToggle = document.getElementById('logsToggle');
+            const chatLogs = document.getElementById('chatLogs');
+            
+            logsToggle.onclick = function() {
+                chatLogs.classList.toggle('hidden');
+            };
         });
+
+        function sendMessage() {
+            const chatContainer = document.getElementById('chatContainer');
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+            if (message) {
+                const userMessage = document.createElement('div');
+                userMessage.classList.add('text-right', 'bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded-lg', 'inline-block', 'mb-2');
+                userMessage.textContent = message;
+                chatContainer.appendChild(userMessage);
+
+                // Simulate AI bot response
+                const botMessage = document.createElement('div');
+                botMessage.classList.add('text-left', 'bg-gray-300', 'text-gray-900', 'px-4', 'py-2', 'rounded-lg', 'inline-block', 'mb-2', 'dark:bg-gray-600', 'dark:text-white');
+                botMessage.textContent = "Bot response to: " + message;
+                chatContainer.appendChild(botMessage);
+
+                chatInput.value = '';
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+        }
     </script>
 </body>
 </html>
