@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,9 +7,29 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-</head>
+    <style>
+        .input-animation {
+            position: relative;
+        }
 
-<body class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white">
+        .input-animation input {
+            transition: all 0.2s ease;
+            padding-right: 2.5rem;
+        }
+
+        .input-animation input:focus {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-animation button {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+<body class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
     <div class="container mx-auto py-10">
         <div class="p-8">
             <div class="flex justify-between items-center mb-6">
@@ -18,8 +37,8 @@
                     <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                     Spotify
                 </h1>
-                <div class="flex items-center space-x-4">
-                    <button id="chatButton" class="text-2xl focus:outline-none">
+                <div class="flex items-center">
+                    <button id="chatButton" class="text-2xl focus:outline-none mr-4">
                         <i class="fas fa-comments"></i>
                     </button>
                     <button id="themeToggle" class="text-2xl focus:outline-none">
@@ -27,12 +46,11 @@
                     </button>
                 </div>
             </div>
-            <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
-                <input type="text" id="searchInput" placeholder="Search..."
-                    class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
-                <button onclick="search()"
-                    class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i
-                        class="fas fa-search"></i></button>
+            <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md input-animation">
+                <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
+                <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-search"></i>
+                </button>
             </div>
             <div id="loader" class="hidden flex items-center justify-center mt-5">
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
@@ -44,50 +62,24 @@
         </div>
     </div>
 
-    <!-- Preview Modal -->
-    <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
+    <!-- Chat Modal -->
+    <div id="chatModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
         <div class="container mx-auto h-full flex items-center justify-center">
             <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
-                <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
-                <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
-                <p id="previewArtist" class="text-gray-700 dark:text-gray-300 mb-2"></p>
-                <p id="previewAlbum" class="text-gray-700 dark:text-gray-300 mb-4"></p>
-                <div id="previewAudioContainer"></div>
-                <a id="previewDownload" href="" download
-                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-2">
-                    <i class="fas fa-download"></i> Download
-                </a>
-                <button onclick="saveToFavorites()"
-                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-blue-300">
-                    <i class="fas fa-save"></i> Save
-                </button>
-                <button onclick="closePreview()"
-                    class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 dark:text-gray-300 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold">Chat Logs</h3>
+                    <button onclick="clearChat()" class="text-red-500"><i class="fas fa-trash"></i></button>
+                </div>
+                <div id="chatLogs" class="overflow-y-auto h-64 mb-4"></div>
+                <div class="relative flex">
+                    <input id="chatInput" type="text" class="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white" placeholder="Type a message...">
+                    <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <button onclick="closeChat()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 dark:text-gray-200 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
                     <i class="fas fa-times"></i>
                 </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Chat Modal -->
-    <div id="chatModal" class="fixed bottom-20 left-10 w-80 h-96 bg-white dark:bg-gray-700 rounded-lg shadow-lg hidden">
-        <div class="flex flex-col h-full">
-            <div class="flex justify-between items-center bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-t-lg">
-                <h3 class="text-lg font-bold">Chat</h3>
-                <button onclick="clearChat()"
-                    class="text-red-500 hover:text-red-700 focus:outline-none focus:ring focus:border-blue-300">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
-            <div id="chatLogs" class="flex-1 p-4 overflow-y-auto">
-                <!-- Chat logs will be appended here -->
-            </div>
-            <div class="flex p-4 border-t border-gray-200 dark:border-gray-600">
-                <input type="text" id="chatInput" placeholder="Type a message..."
-                    class="flex-1 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-800 dark:text-white">
-                <button onclick="sendMessage()"
-                    class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
-                    <i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -98,17 +90,68 @@
         const itemsPerPage = 5;
         let currentPage = 1;
 
-        document.getElementById('themeToggle').addEventListener('click', function () {
+        document.getElementById('themeToggle').addEventListener('click', function() {
             document.body.classList.toggle('dark');
             const themeIcon = document.getElementById('themeIcon');
             themeIcon.classList.toggle('fa-moon');
             themeIcon.classList.toggle('fa-sun');
         });
 
-        document.getElementById('chatButton').addEventListener('click', function () {
-            const chatModal = document.getElementById('chatModal');
-            chatModal.classList.toggle('hidden');
+        document.getElementById('chatButton').addEventListener('click', function() {
+            document.getElementById('chatModal').classList.remove('hidden');
         });
+
+        function closeChat() {
+            document.getElementById('chatModal').classList.add('hidden');
+        }
+
+        function clearChat() {
+            document.getElementById('chatLogs').innerHTML = '';
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+            if (message) {
+                addChatMessage('user', message);
+                chatInput.value = '';
+                axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(message)}`)
+                    .then(response => {
+                        addChatMessage('bot', response.data);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching AI response:', error);
+                    });
+            }
+        }
+
+        function addChatMessage(sender, message) {
+            const chatLogs = document.getElementById('chatLogs');
+            const messageContainer = document.createElement('div');
+            messageContainer.classList.add('flex', 'mb-2', 'items-center');
+
+            const thumbnail = document.createElement('div');
+            thumbnail.classList.add('w-8', 'h-8', 'rounded-full', 'bg-gray-300', 'mr-2');
+            if (sender === 'user') {
+                thumbnail.classList.add('bg-blue-500');
+            } else {
+                thumbnail.classList.add('bg-green-500');
+            }
+
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('px-4', 'py-2', 'rounded-lg', 'max-w-xs', 'dark:text-white');
+            if (sender === 'user') {
+                messageContent.classList.add('bg-blue-100', 'dark:bg-blue-900', 'ml-auto');
+            } else {
+                messageContent.classList.add('bg-green-100', 'dark:bg-green-900', 'mr-auto');
+            }
+            messageContent.textContent = message;
+
+            messageContainer.appendChild(thumbnail);
+            messageContainer.appendChild(messageContent);
+            chatLogs.appendChild(messageContainer);
+            chatLogs.scrollTop = chatLogs.scrollHeight;
+        }
 
         function search() {
             const query = document.getElementById('searchInput').value;
@@ -150,7 +193,7 @@
                         const previewBtn = document.createElement('button');
                         previewBtn.innerHTML = '<i class="fas fa-play"></i> Preview';
                         previewBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300', 'mr-4');
-                        previewBtn.onclick = function () {
+                        previewBtn.onclick = function() {
                             openPreview(song);
                         };
                         songInfo.appendChild(previewBtn);
@@ -236,7 +279,7 @@
                 const playBtn = document.createElement('button');
                 playBtn.innerHTML = '<i class="fas fa-play"></i>';
                 playBtn.classList.add('bg-green-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-green-600', 'focus:outline-none', 'focus:ring', 'focus:border-green-300', 'mr-2');
-                playBtn.onclick = function () {
+                playBtn.onclick = function() {
                     openPreview(song);
                 };
                 songInfo.appendChild(playBtn);
@@ -244,7 +287,7 @@
                 const removeBtn = document.createElement('button');
                 removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
                 removeBtn.classList.add('bg-red-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring', 'focus:border-red-300');
-                removeBtn.onclick = function () {
+                removeBtn.onclick = function() {
                     removeFromFavorites(start + index);
                 };
                 songInfo.appendChild(removeBtn);
@@ -270,12 +313,12 @@
             for (let i = 1; i <= totalPages; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.textContent = i;
-                pageBtn.classList.add('mx-1', 'px-3', 'py-1', 'rounded', 'border', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300');
+                pageBtn.classList.add('mx-1', 'px-3', 'py-1', 'rounded', 'border', 'focus:outline-none', 'focus:ring');
                 if (i === currentPage) {
                     pageBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
                 } else {
                     pageBtn.classList.add('bg-white', 'text-gray-900', 'dark:bg-gray-700', 'dark:text-white');
-                    pageBtn.onclick = function () {
+                    pageBtn.onclick = function() {
                         currentPage = i;
                         displayFavorites();
                     };
@@ -284,10 +327,9 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             displayFavorites();
         });
     </script>
 </body>
-
 </html>
