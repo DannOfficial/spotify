@@ -8,50 +8,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
-        .input-animation {
-            position: relative;
-            display: flex;
-            align-items: center;
+        .dark-mode {
+            background-color: #1a202c;
+            color: white;
         }
-
-        .input-animation input {
-            transition: all 0.2s ease;
-            padding-right: 2.5rem;
-            border: 2px solid transparent;
-            border-image-slice: 1;
-            background: linear-gradient(to right, #11998e, #38ef7d);
-            background-clip: padding-box, border-box;
-            background-origin: padding-box, border-box;
-            border-image-source: linear-gradient(to right, #11998e, #38ef7d);
+        .modal {
+            transition: opacity 0.25s ease;
         }
-
-        .input-animation input:focus {
-            border-color: #38ef7d;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        .modal-active {
+            overflow-x: hidden;
+            overflow-y: visible !important;
         }
-
-        .input-animation button {
-            position: absolute;
-            right: 0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
+        .input-animated {
+            transition: all 0.3s ease-in-out;
         }
-
-        .loader {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #22c55e;
-            border-radius: 50%;
-            width: 1.5rem;
-            height: 1.5rem;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .input-animated:focus {
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
-<body class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+<body class="bg-gray-200 dark:bg-gray-800 dark:text-white">
     <div class="container mx-auto py-10">
         <div class="p-8">
             <div class="flex justify-between items-center mb-6">
@@ -59,23 +36,16 @@
                     <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                     Spotify
                 </h1>
-                <div class="flex items-center">
-                    <button id="chatButton" class="text-2xl focus:outline-none mr-4">
-                        <i class="fas fa-comments"></i>
-                    </button>
-                    <button id="themeToggle" class="text-2xl focus:outline-none">
-                        <i id="themeIcon" class="fas fa-moon"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md input-animation">
-                <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
-                <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
-                    <i class="fas fa-search"></i>
+                <button id="themeToggle" class="text-2xl focus:outline-none">
+                    <i id="themeIcon" class="fas fa-moon"></i>
                 </button>
             </div>
+            <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
+                <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-animated">
+                <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-search"></i></button>
+            </div>
             <div id="loader" class="hidden flex items-center justify-center mt-5">
-                <div class="loader"></div>
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
             </div>
             <div id="results" class="mt-5"></div>
             <h2 class="text-2xl font-bold mt-10">List Favorite</h2>
@@ -85,287 +55,92 @@
     </div>
 
     <!-- Chat Modal -->
-    <div id="chatModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
-        <div class="container mx-auto h-full flex items-center justify-center">
-            <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold">Chat Logs</h3>
-                    <div class="flex items-center">
-                        <button onclick="clearChat()" class="text-red-500 mr-2"><i class="fas fa-trash"></i></button>
-                        <button onclick="closeChat()" class="text-gray-700 dark:text-gray-200 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-                <div id="chatLogs" class="overflow-y-auto h-64 mb-4"></div>
-                <div class="relative flex input-animation">
-                    <input id="chatInput" type="text" class="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white" placeholder="Type a message...">
-                    <button onclick="sendMessage()" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
+    <div id="chatModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white dark:bg-gray-700 p-4 rounded-lg max-w-sm w-full">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">Chat Logs</h3>
+                <button id="closeChatModal" class="text-gray-700 dark:text-white"><i class="fas fa-times"></i></button>
             </div>
+            <div id="chatLogs" class="h-64 overflow-y-auto mb-4 border p-2 rounded dark:bg-gray-800 dark:text-white"></div>
+            <div class="flex items-center">
+                <input type="text" id="chatInput" placeholder="Type your message..." class="flex-grow border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-animated">
+                <button id="sendMessage" class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-paper-plane"></i></button>
+            </div>
+            <button id="clearLogs" class="mt-2 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300"><i class="fas fa-trash"></i> Clear Logs</button>
         </div>
     </div>
 
     <script>
-        let currentSong = null;
-        let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
-        const itemsPerPage = 5;
-        let currentPage = 1;
-
-        document.getElementById('themeToggle').addEventListener('click', function() {
-            document.body.classList.toggle('dark');
+        document.addEventListener('DOMContentLoaded', function() {
+            const themeToggle = document.getElementById('themeToggle');
             const themeIcon = document.getElementById('themeIcon');
-            themeIcon.classList.toggle('fa-moon');
-            themeIcon.classList.toggle('fa-sun');
-        });
-
-        document.getElementById('chatButton').addEventListener('click', function() {
-            document.getElementById('chatModal').classList.remove('hidden');
-        });
-
-        function closeChat() {
-            document.getElementById('chatModal').classList.add('hidden');
-        }
-
-        function clearChat() {
-            document.getElementById('chatLogs').innerHTML = '';
-        }
-
-        function sendMessage() {
-            const chatInput = document.getElementById('chatInput');
-            const message = chatInput.value.trim();
-            if (message) {
-                addChatMessage('user', message);
-                chatInput.value = '';
-
-                // Add loader
-                const loader = addChatMessage('bot', '...');
-
-                axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(message)}`, {
-                    headers: {
-                        'X-Request-With': 'XMLHttpRequest',
-                        'Accept': '*/*',
-                        'User-Agent': navigator.userAgent
-                    }
-                })
-                .then(response => {
-                    loader.textContent = response.data.result;
-                })
-                .catch(error => {
-                    console.error(error);
-                    loader.textContent = 'Error';
-                });
-            }
-        }
-
-        function addChatMessage(sender, message) {
+            const body = document.body;
+            const chatModal = document.getElementById('chatModal');
+            const closeChatModal = document.getElementById('closeChatModal');
             const chatLogs = document.getElementById('chatLogs');
-            const messageContainer = document.createElement('div');
-            messageContainer.classList.add('flex', 'mb-2', 'items-center');
-
-            const thumbnail = document.createElement('div');
-            thumbnail.classList.add('w-8', 'h-8', 'rounded-full', 'bg-gray-300', 'mr-2');
-            if (sender === 'user') {
-                thumbnail.classList.add('bg-blue-500');
-            } else {
-                thumbnail.classList.add('bg-green-500');
+            const chatInput = document.getElementById('chatInput');
+            const sendMessage = document.getElementById('sendMessage');
+            const clearLogs = document.getElementById('clearLogs');
+            
+            let darkMode = localStorage.getItem('darkMode') === 'true';
+            if (darkMode) {
+                body.classList.add('dark-mode');
+                themeIcon.classList.replace('fa-moon', 'fa-sun');
             }
 
-            const messageContent = document.createElement('div');
-            messageContent.classList.add('px-4', 'py-2', 'rounded-lg', 'max-w-xs', 'dark:text-white');
-            if (sender === 'user') {
-                messageContent.classList.add('bg-blue-100', 'dark:bg-blue-900', 'ml-auto');
-            } else {
-                messageContent.classList.add('bg-green-100', 'dark:bg-green-900', 'mr-auto');
-            }
-            messageContent.textContent = message;
-
-            messageContainer.appendChild(thumbnail);
-            messageContainer.appendChild(messageContent);
-            chatLogs.appendChild(messageContainer);
-            chatLogs.scrollTop = chatLogs.scrollHeight;
-
-            return messageContent; // Return the message element for the loader
-        }
-
-        function search() {
-            const query = document.getElementById('searchInput').value;
-            const url = 'https://spotifyapi.caliphdev.com/api/search/tracks?q=' + encodeURIComponent(query);
-
-            document.getElementById('loader').classList.remove('hidden');
-
-            axios.get(url)
-                .then(response => {
-                    document.getElementById('loader').classList.add('hidden');
-                    const resultsDiv = document.getElementById('results');
-                    resultsDiv.innerHTML = '';
-
-                    response.data.forEach(song => {
-                        const resultItem = document.createElement('div');
-                        resultItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
-
-                        const thumbnail = document.createElement('img');
-                        thumbnail.src = song.thumbnail;
-                        thumbnail.classList.add('w-24', 'h-24', 'mr-4');
-                        resultItem.appendChild(thumbnail);
-
-                        const songInfo = document.createElement('div');
-                        const title = document.createElement('h3');
-                        title.textContent = song.title;
-                        title.classList.add('text-lg', 'font-bold', 'mb-1');
-                        songInfo.appendChild(title);
-
-                        const artist = document.createElement('p');
-                        artist.textContent = `Artist: ${song.artist}`;
-                        artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
-                        songInfo.appendChild(artist);
-
-                        const album = document.createElement('p');
-                        album.textContent = `Album: ${song.album}`;
-                        album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
-                        songInfo.appendChild(album);
-
-                        const previewBtn = document.createElement('button');
-                        previewBtn.innerHTML = '<i class="fas fa-play"></i> Preview';
-                        previewBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300', 'mr-4');
-                        previewBtn.onclick = function() {
-                            openPreview(song);
-                        };
-                        songInfo.appendChild(previewBtn);
-
-                        resultItem.appendChild(songInfo);
-                        resultsDiv.appendChild(resultItem);
-                    });
-                })
-                .catch(error => {
-                    document.getElementById('loader').classList.add('hidden');
-                    console.error('Terjadi kesalahan:', error);
-                });
-        }
-
-        function openPreview(song) {
-            currentSong = song;
-            const modal = document.getElementById('previewModal');
-            modal.classList.remove('hidden');
-
-            document.getElementById('previewThumbnail').src = song.thumbnail;
-            document.getElementById('previewTitle').textContent = song.title;
-            document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
-            document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
-
-            const audioContainer = document.getElementById('previewAudioContainer');
-            audioContainer.innerHTML = `
-                <audio controls class="w-full mb-4">
-                    <source src="https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}" type="audio/mp3">
-                    Your browser does not support the audio element.
-                </audio>
-            `;
-
-            document.getElementById('previewDownload').href = `https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`;
-        }
-
-        function closePreview() {
-            const modal = document.getElementById('previewModal');
-            modal.classList.add('hidden');
-        }
-
-        function saveToFavorites() {
-            if (currentSong && !favoriteSongs.some(song => song.url === currentSong.url)) {
-                favoriteSongs.push(currentSong);
-                localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-                displayFavorites();
-                closePreview();
-            }
-        }
-
-        function displayFavorites() {
-            const favoritesDiv = document.getElementById('favorites');
-            favoritesDiv.innerHTML = '';
-
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const currentFavorites = favoriteSongs.slice(start, end);
-
-            currentFavorites.forEach((song, index) => {
-                const favoriteItem = document.createElement('div');
-                favoriteItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
-
-                const thumbnail = document.createElement('img');
-                thumbnail.src = song.thumbnail;
-                thumbnail.classList.add('w-24', 'h-24', 'mr-4');
-                favoriteItem.appendChild(thumbnail);
-
-                const songInfo = document.createElement('div');
-                const title = document.createElement('h3');
-                title.textContent = song.title;
-                title.classList.add('text-lg', 'font-bold', 'mb-1');
-                songInfo.appendChild(title);
-
-                const artist = document.createElement('p');
-                artist.textContent = `Artist: ${song.artist}`;
-                artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
-                songInfo.appendChild(artist);
-
-                const album = document.createElement('p');
-                album.textContent = `Album: ${song.album}`;
-                album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
-                songInfo.appendChild(album);
-
-                const playBtn = document.createElement('button');
-                playBtn.innerHTML = '<i class="fas fa-play"></i>';
-                playBtn.classList.add('bg-green-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-green-600', 'focus:outline-none', 'focus:ring', 'focus:border-green-300', 'mr-2');
-                playBtn.onclick = function() {
-                    openPreview(song);
-                };
-                songInfo.appendChild(playBtn);
-
-                const removeBtn = document.createElement('button');
-                removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
-                removeBtn.classList.add('bg-red-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring', 'focus:border-red-300');
-                removeBtn.onclick = function() {
-                    removeFromFavorites(start + index);
-                };
-                songInfo.appendChild(removeBtn);
-
-                favoriteItem.appendChild(songInfo);
-                favoritesDiv.appendChild(favoriteItem);
+            themeToggle.addEventListener('click', () => {
+                darkMode = !darkMode;
+                localStorage.setItem('darkMode', darkMode);
+                body.classList.toggle('dark-mode');
+                themeIcon.classList.toggle('fa-moon');
+                themeIcon.classList.toggle('fa-sun');
             });
 
-            renderPagination();
-        }
+            themeToggle.insertAdjacentHTML('afterend', '<button id="openChatModal" class="text-2xl focus:outline-none ml-4"><i class="fas fa-comments"></i></button>');
+            document.getElementById('openChatModal').addEventListener('click', () => {
+                chatModal.classList.remove('hidden');
+            });
 
-        function removeFromFavorites(index) {
-            favoriteSongs.splice(index, 1);
-            localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-            displayFavorites();
-        }
+            closeChatModal.addEventListener('click', () => {
+                chatModal.classList.add('hidden');
+            });
 
-        function renderPagination() {
-            const paginationDiv = document.getElementById('pagination');
-            paginationDiv.innerHTML = '';
+            sendMessage.addEventListener('click', async () => {
+                const userMessage = chatInput.value.trim();
+                if (!userMessage) return;
+                appendMessage('User', userMessage);
 
-            const totalPages = Math.ceil(favoriteSongs.length / itemsPerPage);
-            for (let i = 1; i <= totalPages; i++) {
-                const pageBtn = document.createElement('button');
-                pageBtn.textContent = i;
-                pageBtn.classList.add('mx-1', 'px-3', 'py-1', 'rounded', 'border', 'focus:outline-none', 'focus:ring');
-                if (i === currentPage) {
-                    pageBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
-                } else {
-                    pageBtn.classList.add('bg-white', 'text-gray-900', 'dark:bg-gray-700', 'dark:text-white');
-                    pageBtn.onclick = function() {
-                        currentPage = i;
-                        displayFavorites();
-                    };
-                }
-                paginationDiv.appendChild(pageBtn);
+                chatInput.value = '';
+                const response = await fetch(`https://tools.revesery.com/ai/ai.php?query=${userMessage}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': '*/*'
+                    }
+                });
+                const aiResponse = await response.text();
+                appendMessage('AI', aiResponse);
+            });
+
+            clearLogs.addEventListener('click', () => {
+                chatLogs.innerHTML = '';
+            });
+
+            function appendMessage(sender, message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('flex', 'items-start', 'mb-4');
+                
+                const thumbnail = document.createElement('div');
+                thumbnail.classList.add('w-8', 'h-8', 'bg-gray-300', 'rounded-full', 'mr-2');
+                messageDiv.appendChild(thumbnail);
+
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('bg-gray-200', 'dark:bg-gray-600', 'p-2', 'rounded', 'flex-1');
+                messageContent.textContent = message;
+                messageDiv.appendChild(messageContent);
+
+                chatLogs.appendChild(messageDiv);
+                chatLogs.scrollTop = chatLogs.scrollHeight;
             }
-        }
-
-        document.addEventListener('DOMContentLoaded', function() {
-            displayFavorites();
         });
     </script>
 </body>
