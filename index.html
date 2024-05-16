@@ -131,13 +131,12 @@
 
             addChatMessage(chatInput, 'user');
 
-            fetch(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(chatInput)}`, {
+            axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(chatInput)}`, {
                 headers: {
                     'X-Request-With': 'XMLHttpRequest',
                     'Accept': '*/*'
                 }
             })
-            .then(response => response.json())
             .then(data => {
                 addChatMessage(data.result, 'bot');
             })
