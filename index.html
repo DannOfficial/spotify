@@ -66,12 +66,11 @@
     <div id="chatModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
         <div class="container mx-auto h-full flex items-center justify-center">
             <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
-                <h3 class="text-lg font-bold mb-4">Chat with AI Bot</h3>
+                <h3 class="text-lg font-bold mb-4">DannTeam AI - Chat</h3>
                 <div id="chatContainer" class="mb-4 max-h-96 overflow-y-auto">
-                    <!-- Chat messages will appear here -->
                 </div>
                 <div class="flex items-center space-x-2">
-                    <input type="text" id="chatInput" placeholder="Type a message..." class="flex-1 border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
+                    <input type="text" id="chatInput" placeholder="Ketik..." class="flex-1 border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
                     <button id="sendButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-paper-plane"></i></button>
                     <button id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300"><i class="fas fa-trash"></i></button>
                 </div>
@@ -119,7 +118,7 @@
             .then(data => {
                 addChatMessage(data.result, 'bot');
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => console.error(error));
 
             document.getElementById('chatInput').value = '';
         }
