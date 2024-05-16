@@ -34,8 +34,8 @@
                 <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
                 <p id="previewAlbum" class="text-gray-700 mb-4"></p>
-                <audio controls class="preview-audio w-full mb-4">
-                    <source class="audio-source" src="" type="audio/mp3">
+                <audio controls class="audio-preview w-full mb-4">
+                    <source src="" type="audio/mp3">
                     Your browser does not support the audio element.
                 </audio>
                 <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4">
@@ -115,19 +115,18 @@
             document.getElementById('previewTitle').textContent = song.title;
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
-
-            const previewAudio = document.querySelector('.preview-audio');
-            const audioSource = previewAudio.querySelector('.audio-source');
-            audioSource.src = song.url;
+            
+            const audioElement = document.querySelector('.audio-preview');
+            audioElement.querySelector('source').src = song.url;
+            audioElement.load(); // Load the new source
 
             if (currentAudio) {
                 currentAudio.pause();
             }
 
-            previewAudio.load();
-            previewAudio.addEventListener('loadedmetadata', function() {
-                previewAudio.play().then(() => {
-                    currentAudio = previewAudio;
+            audioElement.addEventListener('loadedmetadata', function() {
+                audioElement.play().then(() => {
+                    currentAudio = audioElement;
                 }).catch(error => {
                     console.error('Error playing audio:', error);
                 });
