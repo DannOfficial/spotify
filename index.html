@@ -7,14 +7,8 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        .dark-mode {
-            background-color: #2d3748;
-            color: #f7fafc;
-        }
-    </style>
 </head>
-<body class="bg-gray-200 dark-mode:bg-gray-900">
+<body class="bg-gray-200 dark:bg-gray-900 dark:text-white transition-colors duration-300">
     <div class="container mx-auto py-10">
         <div class="p-8">
             <div class="flex justify-between items-center mb-6">
@@ -22,9 +16,14 @@
                     <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                     Spotify
                 </h1>
-                <button id="themeToggle" class="text-2xl focus:outline-none">
-                    <i id="themeIcon" class="fas fa-moon"></i>
-                </button>
+                <div class="flex items-center">
+                    <button id="themeToggle" class="text-2xl focus:outline-none mr-4">
+                        <i id="themeIcon" class="fas fa-moon"></i>
+                    </button>
+                    <button id="logButton" class="text-2xl focus:outline-none">
+                        <i class="fas fa-comments"></i>
+                    </button>
+                </div>
             </div>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
                 <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
@@ -46,8 +45,8 @@
             <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
                 <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
                 <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
-                <p id="previewArtist" class="text-gray-700 mb-2"></p>
-                <p id="previewAlbum" class="text-gray-700 mb-4"></p>
+                <p id="previewArtist" class="text-gray-700 mb-2 dark:text-gray-300"></p>
+                <p id="previewAlbum" class="text-gray-700 mb-4 dark:text-gray-300"></p>
                 <div id="previewAudioContainer"></div>
                 <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-2">
                     <i class="fas fa-download"></i> Download
@@ -62,15 +61,19 @@
         </div>
     </div>
 
-    <!-- Chat Logs Modal -->
-    <div id="logsModal" class="fixed top-16 left-0 w-80 h-80 bg-white dark:bg-gray-700 rounded-lg shadow-lg hidden overflow-y-auto p-4">
-        <h3 class="text-lg font-bold mb-4">Chat Logs</h3>
-        <div id="logsContent" class="space-y-4">
-            <!-- Chat logs will be loaded here -->
+    <!-- Chat Log Modal -->
+    <div id="logModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
+        <div class="container mx-auto h-full flex items-center justify-center">
+            <div class="bg-white p-8 rounded-lg relative w-full max-w-sm dark:bg-gray-700">
+                <h3 class="text-lg font-bold mb-4">Chat Logs</h3>
+                <div id="chatLogs" class="max-h-96 overflow-y-auto">
+                    <!-- Chat logs will be appended here -->
+                </div>
+                <button onclick="closeLogModal()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
-        <button onclick="closeLogs()" class="absolute top-0 right-0 mt-2 mr-2 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
-            <i class="fas fa-times"></i>
-        </button>
     </div>
 
     <script>
@@ -79,10 +82,11 @@
         const itemsPerPage = 5;
         let currentPage = 1;
 
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
+        // Toggle Theme
+        document.getElementById('themeToggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark');
             const themeIcon = document.getElementById('themeIcon');
-            if (document.body.classList.contains('dark-mode')) {
+            if (document.body.classList.contains('dark')) {
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
             } else {
@@ -91,6 +95,49 @@
             }
         });
 
+        // Open Log Modal
+        document.getElementById('logButton').addEventListener('click', function() {
+            fetchLogs();
+            document.getElementById('logModal').classList.remove('hidden');
+        });
+
+        function closeLogModal() {
+            document.getElementById('logModal').classList.add('hidden');
+        }
+
+        // Fetch Chat Logs
+        function fetchLogs() {
+            axios.get('https://tools.revesery.com/ai/ai.php?query=')
+                .then(response => {
+                    const chatLogsDiv = document.getElementById('chatLogs');
+                    chatLogsDiv.innerHTML = '';
+
+                    response.data.forEach(chat => {
+                        const chatItem = document.createElement('div');
+                        chatItem.classList.add('flex', 'items-center', 'p-4', 'mb-4', 'bg-gray-100', 'dark:bg-gray-800', 'rounded-lg');
+
+                        const thumbnail = document.createElement('img');
+                        thumbnail.src = 'https://via.placeholder.com/40';
+                        thumbnail.classList.add('w-10', 'h-10', 'rounded-full', 'mr-4');
+                        chatItem.appendChild(thumbnail);
+
+                        const chatText = document.createElement('div');
+                        chatText.innerHTML = `
+                            <p><strong>User:</strong> ${chat.user}</p>
+                            <p><strong>AI:</strong> ${chat.ai}</p>
+                        `;
+                        chatText.classList.add('text-gray-700', 'dark:text-gray-300');
+                        chatItem.appendChild(chatText);
+
+                        chatLogsDiv.appendChild(chatItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Terjadi kesalahan:', error);
+                });
+        }
+
+        // Your existing search, preview, favorite functions go here...
         function search() {
             const query = document.getElementById('searchInput').value;
             const url = 'https://spotifyapi.caliphdev.com/api/search/tracks?q=' + encodeURIComponent(query);
@@ -265,52 +312,8 @@
             }
         }
 
-        function loadLogs() {
-            axios.get('https://tools.revesery.com/ai/ai.php?query=log')
-                .then(response => {
-                    const logsContent = document.getElementById('logsContent');
-                    logsContent.innerHTML = '';
-
-                    response.data.logs.forEach(log => {
-                        const logItem = document.createElement('div');
-                        logItem.classList.add('flex', 'items-center', 'bg-gray-100', 'dark:bg-gray-800', 'p-2', 'rounded-lg');
-
-                        const thumbnail = document.createElement('img');
-                        thumbnail.src = log.user_avatar;
-                        thumbnail.classList.add('w-8', 'h-8', 'rounded-full', 'mr-2');
-                        logItem.appendChild(thumbnail);
-
-                        const message = document.createElement('div');
-                        message.classList.add('flex', 'flex-col');
-
-                        const userMessage = document.createElement('p');
-                        userMessage.textContent = log.user_message;
-                        userMessage.classList.add('text-gray-900', 'dark:text-white');
-                        message.appendChild(userMessage);
-
-                        const botMessage = document.createElement('p');
-                        botMessage.textContent = log.bot_message;
-                        botMessage.classList.add('text-gray-600', 'dark:text-gray-300');
-                        message.appendChild(botMessage);
-
-                        logItem.appendChild(message);
-                        logsContent.appendChild(logItem);
-                    });
-
-                    document.getElementById('logsModal').classList.remove('hidden');
-                })
-                .catch(error => {
-                    console.error('Terjadi kesalahan saat memuat log:', error);
-                });
-        }
-
-        function closeLogs() {
-            document.getElementById('logsModal').classList.add('hidden');
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
             displayFavorites();
-            document.getElementById('themeToggle').insertAdjacentHTML('beforebegin', '<button onclick="loadLogs()" class="mr-4 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-gray-200 p-2 rounded-full focus:outline-none focus:ring focus:border-gray-300"><i class="fas fa-history"></i></button>');
         });
     </script>
 </body>
