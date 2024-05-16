@@ -23,30 +23,26 @@
                 <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
             </div>
             <div id="results" class="mt-5"></div>
-            <div id="favorites" class="mt-10">
-                <h2 class="text-2xl font-bold mb-4">Favorite Songs</h2>
-                <ul id="favoriteList" class="list-disc pl-5"></ul>
-            </div>
+            <h2 class="text-2xl font-bold text-white mt-10">List Favorite</h2>
+            <div id="favorites" class="mt-5"></div>
         </div>
     </div>
 
     <!-- Preview Modal -->
     <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
         <div class="container mx-auto h-full flex items-center justify-center">
-            <div class="bg-white p-8 rounded-lg relative w-2/3">
+            <div class="bg-white p-8 rounded-lg relative w-full max-w-lg">
                 <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
                 <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
                 <p id="previewAlbum" class="text-gray-700 mb-4"></p>
                 <div id="previewAudioContainer"></div>
-                <div class="flex justify-between mt-4">
-                    <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
-                        <i class="fas fa-download"></i> Download
-                    </a>
-                    <button id="saveButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300">
-                        <i class="fas fa-save"></i> Save
-                    </button>
-                </div>
+                <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-2">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                <button onclick="saveToFavorites()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-save"></i> Save
+                </button>
                 <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
                     <i class="fas fa-times"></i>
                 </button>
@@ -55,7 +51,8 @@
     </div>
 
     <script>
-        const favorites = [];
+        let currentSong = null;
+        let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
 
         function search() {
             const query = document.getElementById('searchInput').value;
@@ -113,6 +110,7 @@
         }
 
         function openPreview(song) {
+            currentSong = song;
             const modal = document.getElementById('previewModal');
             modal.classList.remove('hidden');
 
@@ -130,11 +128,6 @@
             `;
 
             document.getElementById('previewDownload').href = `https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`;
-
-            const saveButton = document.getElementById('saveButton');
-            saveButton.onclick = function() {
-                addToFavorites(song);
-            };
         }
 
         function closePreview() {
@@ -142,43 +135,66 @@
             modal.classList.add('hidden');
         }
 
-        function addToFavorites(song) {
-            if (!favorites.some(fav => fav.url === song.url)) {
-                favorites.push(song);
-                updateFavoritesList();
+        function saveToFavorites() {
+            if (currentSong && !favoriteSongs.some(song => song.url === currentSong.url)) {
+                favoriteSongs.push(currentSong);
+                localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+                displayFavorites();
                 closePreview();
             }
         }
 
-        function removeFromFavorites(url) {
-            const index = favorites.findIndex(fav => fav.url === url);
-            if (index !== -1) {
-                favorites.splice(index, 1);
-                updateFavoritesList();
-            }
-        }
+        function displayFavorites() {
+            const favoritesDiv = document.getElementById('favorites');
+            favoritesDiv.innerHTML = '';
 
-        function updateFavoritesList() {
-            const favoriteList = document.getElementById('favoriteList');
-            favoriteList.innerHTML = '';
+            favoriteSongs.forEach((song, index) => {
+                const favoriteItem = document.createElement('div');
+                favoriteItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4');
 
-            favorites.forEach(song => {
-                const listItem = document.createElement('li');
-                listItem.classList.add('flex', 'justify-between', 'items-center', 'mb-2');
+                const thumbnail = document.createElement('img');
+                thumbnail.src = song.thumbnail;
+                thumbnail.classList.add('w-24', 'h-24', 'mr-4');
+                favoriteItem.appendChild(thumbnail);
 
-                const songInfo = document.createElement('span');
-                songInfo.textContent = `${song.title} by ${song.artist}`;
-                listItem.appendChild(songInfo);
+                const songInfo = document.createElement('div');
+                const title = document.createElement('h3');
+                title.textContent = song.title;
+                title.classList.add('text-lg', 'font-bold', 'mb-1');
+                songInfo.appendChild(title);
 
-                const removeButton = document.createElement('button');
-                removeButton.innerHTML = '<i class="fas fa-trash"></i>';
-                removeButton.classList.add('bg-red-500', 'text-white', 'px-2', 'py-1', 'rounded', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring', 'focus:border-red-300');
-                removeButton.onclick = function() {
-                    removeFromFavorites(song.url);
+                const artist = document.createElement('p');
+                artist.textContent = `Artist: ${song.artist}`;
+                artist.classList.add('text-gray-700', 'mb-1');
+                songInfo.appendChild(artist);
+
+                const album = document.createElement('p');
+                album.textContent = `Album: ${song.album}`;
+                album.classList.add('text-gray-700', 'mb-1');
+                songInfo.appendChild(album);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                removeBtn.classList.add('bg-red-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring', 'focus:border-red-300');
+                removeBtn.onclick = function() {
+                    removeFromFavorites(index);
                 };
-                listItem.appendChild(removeButton);
+                songInfo.appendChild(removeBtn);
 
-                favoriteList.appendChild(listItem);
+                favoriteItem.appendChild(songInfo);
+                favoritesDiv.appendChild(favoriteItem);
             });
         }
-    </
+
+        function removeFromFavorites(index) {
+            favoriteSongs.splice(index, 1);
+            localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+            displayFavorites();
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayFavorites();
+        });
+    </script>
+</body>
+</html>
