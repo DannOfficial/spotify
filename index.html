@@ -1,3 +1,6 @@
+<!-- DannTeam || Spotify -->
+<!-- www.spotify.dannteam.com -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -114,7 +117,7 @@
             })
             .then(response => response.json())
             .then(data => {
-                addChatMessage(data.response, 'bot');
+                addChatMessage(data.result, 'bot');
             })
             .catch(error => console.error('Error:', error));
 
