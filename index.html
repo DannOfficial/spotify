@@ -63,46 +63,6 @@
     </div>
 
     <!-- Preview Modal -->
-    ChatGPT
-
-User
-Buatkan kode toggle switch theme dark/light mode supaya responsif berubah warna sesuai switch theme dengan baik, dan buatkan kode button logs modal menu berisi chat user dan ai bot menggunakan font awesome chat dan untuk api dengan fetch https://tools.revesery.com/ai/ai.php?query=${prompt} dengan headers X-Request-With XMLHttpRequest, Accept  */* dan ukuran width dan height kecil dibagian samping kiri toggle switch theme dark/light mode, dan ada thumbnail dengan bulat dan ukuran kecil di samping kiri chat user dan ai bot, dan buatkan kode input field yang bagus dengan animation yang keren memiliki efek, dan button font awesome paper plane untuk mengirim pesan ke ai bot dan ai bot otomatis menjawab pada sesuai api, dan button font awesome trash untuk menghapus chat logs dengan ai bot, dari <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Search - DannTeam</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-</head>
-<body class="bg-gray-200">
-    <div class="container mx-auto py-10">
-        <div class="p-8">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-3xl font-bold text-center flex items-center justify-center">
-                    <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
-                    Spotify
-                </h1>
-                <button id="themeToggle" class="text-2xl focus:outline-none">
-                    <i id="themeIcon" class="fas fa-moon"></i>
-                </button>
-            </div>
-            <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
-                <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
-                <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-search"></i></button>
-            </div>
-            <div id="loader" class="hidden flex items-center justify-center mt-5">
-                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-            </div>
-            <div id="results" class="mt-5"></div>
-            <h2 class="text-2xl font-bold mt-10">List Favorite</h2>
-            <div id="favorites" class="mt-5"></div>
-            <div id="pagination" class="flex justify-center mt-5"></div>
-        </div>
-    </div>
-
-    <!-- Preview Modal -->
     <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
         <div class="container mx-auto h-full flex items-center justify-center">
             <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
