@@ -49,8 +49,6 @@
     </div>
 
     <script>
-        let currentAudio = null;
-
         function search() {
             const query = document.getElementById('searchInput').value;
             const url = 'https://spotifyapi.caliphdev.com/api/search/tracks?q=' + encodeURIComponent(query);
@@ -115,26 +113,11 @@
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
 
-            const audioElement = document.querySelector('.audio-preview');
             const audioSource = document.getElementById('audioSource');
 
             axios.get(`https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`)
                 .then(response => {
                     audioSource.src = response.data;
-                    audioElement.load();
-
-                    if (currentAudio) {
-                        currentAudio.pause();
-                    }
-
-                    audioElement.addEventListener('loadedmetadata', function() {
-                        audioElement.play().then(() => {
-                            currentAudio = audioElement;
-                        }).catch(error => {
-                            console.error(error);
-                        });
-                    });
-
                     document.getElementById('previewDownload').href = response.data;
                 })
                 .catch(error => {
@@ -145,10 +128,6 @@
         function closePreview() {
             const modal = document.getElementById('previewModal');
             modal.classList.add('hidden');
-
-            if (currentAudio) {
-                currentAudio.pause();
-            }
         }
     </script>
 </body>
