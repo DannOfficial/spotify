@@ -108,10 +108,11 @@
 
             addChatMessage(chatInput, 'user');
 
-            fetch(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(chatInput)}`, {
+            fetch(`https://tools.revesery.com/ai/ai.php?query=${chatInput}`, {
                 headers: {
-                    'X-Request-With': 'XMLHttpRequest',
-                    'Accept': '*/*'
+                    'Accept': '*/*',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.9999.999 Safari/537.36',
+                    'X-Requested-With': 'XMLHttpRequest'
                 }
             })
             .then(response => response.json())
