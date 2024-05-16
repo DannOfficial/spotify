@@ -145,16 +145,16 @@
 
                 axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(message)}`, {
                     headers: {
-                        'X-Request': 'XMLHttpRequest',
+                        'X-Request-With': 'XMLHttpRequest',
                         'Accept': '*/*',
                         'User-Agent': navigator.userAgent
                     }
                 })
                 .then(response => {
-                    loader.textContent = response.data.response;
+                    loader.textContent = response.data;
                 })
                 .catch(error => {
-                    console.error('Error fetching AI response:', error);
+                    console.error(error);
                     loader.textContent = 'Error';
                 });
             }
