@@ -8,27 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <style>
-        /* Animation for input field */
-        @keyframes slideIn {
-            from {
-                width: 0;
-                opacity: 0;
-            }
-
-            to {
-                width: 100%;
-                opacity: 1;
-            }
-        }
-
-        .animated-input {
-            animation: slideIn 0.5s ease-out forwards;
-        }
-    </style>
 </head>
 
-<body class="bg-gray-200 dark:bg-gray-800 dark:text-white">
+<body class="bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-white">
     <div class="container mx-auto py-10">
         <div class="p-8">
             <div class="flex justify-between items-center mb-6">
@@ -36,16 +18,18 @@
                     <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                     Spotify
                 </h1>
-                <button id="themeToggle" class="text-2xl focus:outline-none">
-                    <i id="themeIcon" class="fas fa-moon"></i>
-                </button>
-                <button id="chatButton" class="ml-4 text-2xl focus:outline-none">
-                    <i class="fas fa-comments"></i>
-                </button>
+                <div class="flex items-center space-x-4">
+                    <button id="chatButton" class="text-2xl focus:outline-none">
+                        <i class="fas fa-comments"></i>
+                    </button>
+                    <button id="themeToggle" class="text-2xl focus:outline-none">
+                        <i id="themeIcon" class="fas fa-moon"></i>
+                    </button>
+                </div>
             </div>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
                 <input type="text" id="searchInput" placeholder="Search..."
-                    class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white animated-input">
+                    class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
                 <button onclick="search()"
                     class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i
                         class="fas fa-search"></i></button>
@@ -60,87 +44,71 @@
         </div>
     </div>
 
-    <!-- Chat Modal -->
-    <div id="chatModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
+    <!-- Preview Modal -->
+    <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
         <div class="container mx-auto h-full flex items-center justify-center">
-            <div class="bg-white p-8 rounded-lg relative w-full max-w-sm dark:bg-gray-700">
-                <h3 class="text-lg font-bold mb-4">Chat with AI</h3>
-                <div id="chatBox" class="mb-4 h-64 overflow-y-auto bg-gray-100 dark:bg-gray-800 p-4 rounded">
-                    <!-- Chat messages will appear here -->
-                </div>
-                <div class="flex items-center">
-                    <input type="text" id="chatInput" placeholder="Type your message..."
-                        class="flex-1 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white">
-                    <button onclick="sendMessage()"
-                        class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i
-                            class="fas fa-paper-plane"></i></button>
-                </div>
-                <button onclick="closeChat()"
-                    class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+            <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
+                <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
+                <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
+                <p id="previewArtist" class="text-gray-700 dark:text-gray-300 mb-2"></p>
+                <p id="previewAlbum" class="text-gray-700 dark:text-gray-300 mb-4"></p>
+                <div id="previewAudioContainer"></div>
+                <a id="previewDownload" href="" download
+                    class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-2">
+                    <i class="fas fa-download"></i> Download
+                </a>
+                <button onclick="saveToFavorites()"
+                    class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-save"></i> Save
+                </button>
+                <button onclick="closePreview()"
+                    class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 dark:text-gray-300 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Chat Modal -->
+    <div id="chatModal" class="fixed bottom-20 left-10 w-80 h-96 bg-white dark:bg-gray-700 rounded-lg shadow-lg hidden">
+        <div class="flex flex-col h-full">
+            <div class="flex justify-between items-center bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-t-lg">
+                <h3 class="text-lg font-bold">Chat</h3>
+                <button onclick="clearChat()"
+                    class="text-red-500 hover:text-red-700 focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+            <div id="chatLogs" class="flex-1 p-4 overflow-y-auto">
+                <!-- Chat logs will be appended here -->
+            </div>
+            <div class="flex p-4 border-t border-gray-200 dark:border-gray-600">
+                <input type="text" id="chatInput" placeholder="Type a message..."
+                    class="flex-1 border border-gray-300 dark:border-gray-600 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-800 dark:text-white">
+                <button onclick="sendMessage()"
+                    class="bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        document.getElementById('themeToggle').addEventListener('click', function () {
-            document.body.classList.toggle('dark');
-            const themeIcon = document.getElementById('themeIcon');
-            if (document.body.classList.contains('dark')) {
-                themeIcon.classList.remove('fa-moon');
-                themeIcon.classList.add('fa-sun');
-            } else {
-                themeIcon.classList.remove('fa-sun');
-                themeIcon.classList.add('fa-moon');
-            }
-        });
-
-        document.getElementById('chatButton').addEventListener('click', function () {
-            document.getElementById('chatModal').classList.remove('hidden');
-        });
-
-        function closeChat() {
-            document.getElementById('chatModal').classList.add('hidden');
-        }
-
-        function sendMessage() {
-            const chatInput = document.getElementById('chatInput');
-            const chatBox = document.getElementById('chatBox');
-            const userMessage = chatInput.value;
-
-            if (userMessage.trim() === '') return;
-
-            const userMessageElement = document.createElement('div');
-            userMessageElement.classList.add('flex', 'items-start', 'mb-4');
-            userMessageElement.innerHTML = `
-                <img src="https://via.placeholder.com/30" alt="User" class="rounded-full mr-3">
-                <div class="bg-blue-500 text-white p-2 rounded-md">${userMessage}</div>
-            `;
-            chatBox.appendChild(userMessageElement);
-            chatBox.scrollTop = chatBox.scrollHeight;
-            chatInput.value = '';
-
-            axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(userMessage)}`)
-                .then(response => {
-                    const botMessageElement = document.createElement('div');
-                    botMessageElement.classList.add('flex', 'items-start', 'mb-4');
-                    botMessageElement.innerHTML = `
-                        <img src="https://via.placeholder.com/30" alt="Bot" class="rounded-full mr-3">
-                        <div class="bg-gray-300 dark:bg-gray-600 p-2 rounded-md">${response.data}</div>
-                    `;
-                    chatBox.appendChild(botMessageElement);
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-
         let currentSong = null;
         let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
         const itemsPerPage = 5;
         let currentPage = 1;
+
+        document.getElementById('themeToggle').addEventListener('click', function () {
+            document.body.classList.toggle('dark');
+            const themeIcon = document.getElementById('themeIcon');
+            themeIcon.classList.toggle('fa-moon');
+            themeIcon.classList.toggle('fa-sun');
+        });
+
+        document.getElementById('chatButton').addEventListener('click', function () {
+            const chatModal = document.getElementById('chatModal');
+            chatModal.classList.toggle('hidden');
+        });
 
         function search() {
             const query = document.getElementById('searchInput').value;
@@ -302,7 +270,7 @@
             for (let i = 1; i <= totalPages; i++) {
                 const pageBtn = document.createElement('button');
                 pageBtn.textContent = i;
-                pageBtn.classList.add('mx-1', 'px-3', 'py-1', 'rounded', 'border', 'focus:outline-none', 'focus:ring');
+                pageBtn.classList.add('mx-1', 'px-3', 'py-1', 'rounded', 'border', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300');
                 if (i === currentPage) {
                     pageBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
                 } else {
