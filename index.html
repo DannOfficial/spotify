@@ -6,13 +6,13 @@
     <title>Spotify Search - DannTeam</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 <body class="bg-gray-200">
     <div class="container mx-auto py-10">
          <div class="p-8">
             <h1 class="text-3xl font-bold text-center text-white flex items-center justify-center mb-6">
-                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify"
-                    class="w-8 h-8 mr-2">
+                <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
                 Spotify
             </h1>
             <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
@@ -35,7 +35,7 @@
                 <p id="previewArtist" class="text-gray-700 mb-2"></p>
                 <p id="previewAlbum" class="text-gray-700 mb-4"></p>
                 <audio controls class="audio-preview w-full mb-4">
-                    <source src="" type="audio/mp3">
+                    <source id="audioSource" src="" type="audio/mp3">
                     Your browser does not support the audio element.
                 </audio>
                 <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-4">
@@ -57,14 +57,13 @@
 
             document.getElementById('loader').classList.remove('hidden');
 
-            fetch(url)
-                .then(response => response.json())
-                .then(data => {
+            axios.get(url)
+                .then(response => {
                     document.getElementById('loader').classList.add('hidden');
                     const resultsDiv = document.getElementById('results');
                     resultsDiv.innerHTML = '';
 
-                    data.forEach(song => {
+                    response.data.forEach(song => {
                         const resultItem = document.createElement('div');
                         resultItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4');
 
@@ -115,24 +114,32 @@
             document.getElementById('previewTitle').textContent = song.title;
             document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
             document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
-            
+
             const audioElement = document.querySelector('.audio-preview');
-            audioElement.querySelector('source').src = song.url;
-            audioElement.load(); // Load the new source
+            const audioSource = document.getElementById('audioSource');
 
-            if (currentAudio) {
-                currentAudio.pause();
-            }
+            axios.get(`https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`)
+                .then(response => {
+                    audioSource.src = response.data.audioUrl;
+                    audioElement.load(); // Load the new source
 
-            audioElement.addEventListener('loadedmetadata', function() {
-                audioElement.play().then(() => {
-                    currentAudio = audioElement;
-                }).catch(error => {
-                    console.error('Error playing audio:', error);
+                    if (currentAudio) {
+                        currentAudio.pause();
+                    }
+
+                    audioElement.addEventListener('loadedmetadata', function() {
+                        audioElement.play().then(() => {
+                            currentAudio = audioElement;
+                        }).catch(error => {
+                            console.error(error);
+                        });
+                    });
+
+                    document.getElementById('previewDownload').href = response.data.audioUrl;
+                })
+                .catch(error => {
+                    console.error(error);
                 });
-            });
-
-            document.getElementById('previewDownload').href = song.url;
         }
 
         function closePreview() {
