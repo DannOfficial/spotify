@@ -120,8 +120,8 @@
 
             axios.get(`https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`)
                 .then(response => {
-                    audioSource.src = response.data.audioUrl;
-                    audioElement.load(); // Load the new source
+                    audioSource.src = response.data;
+                    audioElement.load();
 
                     if (currentAudio) {
                         currentAudio.pause();
@@ -135,7 +135,7 @@
                         });
                     });
 
-                    document.getElementById('previewDownload').href = response.data.audioUrl;
+                    document.getElementById('previewDownload').href = response.data;
                 })
                 .catch(error => {
                     console.error(error);
