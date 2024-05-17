@@ -6,7 +6,7 @@
     <title>Spotify Search - DannTeam</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         .theme-dark {
             background-color: #1a202c;
@@ -26,286 +26,307 @@
         .input-effect:focus {
             transform: scale(1.05);
         }
+        #captcha-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #main-content {
+            display: none;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-gray-200">
-    <div id="captchaModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center">
-        <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
-            <h3 class="text-lg font-bold mb-4">Verify CAPTCHA</h3>
-            <div id="captchaContainer" class="mb-4">
-                <img id="captchaImage" src="https://source.unsplash.com/random/200x50" alt="Captcha">
+
+<div id="captcha-container">
+    <div class="bg-white p-6 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-bold mb-4">Verify CAPTCHA</h2>
+        <p class="mb-4">Please enter the number shown below:</p>
+        <div class="flex items-center mb-4">
+            <span id="captcha-number" class="text-xl font-bold mr-4"></span>
+            <input type="text" id="captcha-input" class="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300">
+        </div>
+        <button id="captcha-submit" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Submit</button>
+    </div>
+</div>
+
+<div id="main-content">
+    <div class="container mx-auto py-10">
+        <div class="p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-3xl font-bold text-center flex items-center justify-center">
+                    <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
+                    Spotify
+                </h1>
+                <div class="flex items-center space-x-4">
+                    <button id="themeToggle" class="text-2xl focus:outline-none">
+                        <i id="themeIcon" class="fas fa-moon"></i>
+                    </button>
+                    <button id="chatToggle" class="text-2xl focus:outline-none">
+                        <i class="fas fa-comments"></i>
+                    </button>
+                </div>
             </div>
-            <input type="text" id="captchaInput" placeholder="Enter CAPTCHA" class="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect mb-4">
-            <button id="verifyCaptchaButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Verify</button>
+            <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
+                <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
+                <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-search"></i></button>
+            </div>
+            <div id="loader" class="hidden flex items-center justify-center mt-5">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+            <div id="results" class="mt-5"></div>
+            <h2 class="text-2xl font-bold mt-10">List Favorite</h2>
+            <div id="favorites" class="mt-5"></div>
+            <div id="pagination" class="flex justify-center mt-5"></div>
         </div>
     </div>
-    
-    <div id="mainContent" class="hidden">
-        <div class="container mx-auto py-10">
-            <div class="p-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold text-center flex items-center justify-center">
-                        <img src="https://telegra.ph/file/cfc04dd49ece4a846ac6c.png" alt="Spotify" class="w-8 h-8 mr-2">
-                        Spotify
-                    </h1>
-                    <div class="flex items-center space-x-4">
-                        <button id="themeToggle" class="text-2xl focus:outline-none">
-                            <i id="themeIcon" class="fas fa-moon"></i>
-                        </button>
-                        <button id="chatToggle" class="text-2xl focus:outline-none">
-                            <i class="fas fa-comments"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
-                    <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
-                    <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-search"></i></button>
-                </div>
-                <div id="loader" class="hidden flex items-center justify-center mt-5">
-                    <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
-                <div id="results" class="mt-5"></div>
-                <h2 class="text-2xl font-bold mt-10">List Favorite</h2>
-                <div id="favorites" class="mt-5"></div>
-                <div id="pagination" class="flex justify-center mt-5"></div>
-            </div>
-        </div>
 
-        <!-- Preview Modal -->
-        <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
-            <div class="container mx-auto h-full flex items-center justify-center">
-                <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
-                    <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
-                    <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
-                    <p id="previewArtist" class="text-gray-700 mb-2"></p>
-                    <p id="previewAlbum" class="text-gray-700 mb-4"></p>
-                    <div id="previewAudioContainer"></div>
-                    <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-2">
-                        <i class="fas fa-download"></i>
-                    </a>
-                    <button onclick="saveToFavorites()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-blue-300">
-                        <i class="fas fa-save"></i>
-                    </button>
-                    <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat Modal -->
-        <div id="chatModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
-            <div class="container mx-auto h-full flex items-center justify-center">
-                <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
-                    <h3 class="text-lg font-bold mb-4">DannTeam AI - Chat</h3>
-                    <div id="chatContainer" class="mb-4 max-h-96 overflow-y-auto">
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <input type="text" id="chatInput" placeholder="Ketik..." class="flex-1 border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
-                        <button id="sendButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-paper-plane"></i></button>
-                        <button id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300"><i class="fas fa-trash"></i></button>
-                    </div>
-                    <button onclick="closeChat()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+    <!-- Preview Modal -->
+    <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
+        <div class="container mx-auto h-full flex items-center justify-center">
+            <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
+                <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
+                <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
+                <p id="previewArtist" class="text-gray-700 mb-2"></p>
+                <p id="previewAlbum" class="text-gray-700 mb-4"></p>
+                <div id="previewAudioContainer"></div>
+                <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-2">
+                    <i class="fas fa-download"></i>
+                </a>
+                <button onclick="saveToFavorites()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-save"></i>
+                </button>
+                <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         </div>
     </div>
-    
-    <script>
-        let currentSong = null;
-        let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
-        const itemsPerPage = 5;
-        let currentPage = 1;
-        let isDarkTheme = false;
 
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            isDarkTheme = !isDarkTheme;
-            document.body.classList.toggle('theme-dark', isDarkTheme);
-            document.getElementById('themeIcon').classList.toggle('fa-moon', !isDarkTheme);
-            document.getElementById('themeIcon').classList.toggle('fa-sun', isDarkTheme);
+
+    <!-- Chat Modal -->
+    <div id="chatModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
+        <div class="container mx-auto h-full flex items-center justify-center">
+            <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
+                <h3 class="text-lg font-bold mb-4">DannTeam AI - Chat</h3>
+                <div id="chatContainer" class="mb-4 max-h-96 overflow-y-auto">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="chatInput" placeholder="Ketik..." class="flex-1 border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
+                    <button id="sendButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-paper-plane"></i></button>
+                    <button id="clearButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300"><i class="fas fa-trash"></i></button>
+                </div>
+                <button onclick="closeChat()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Generate random CAPTCHA number and display it
+    const captchaNumber = Math.floor(Math.random() * 9000) + 1000;
+    document.getElementById('captcha-number').textContent = captchaNumber;
+
+    // CAPTCHA verification
+    document.getElementById('captcha-submit').addEventListener('click', () => {
+        const input = document.getElementById('captcha-input').value;
+        if (parseInt(input) === captchaNumber) {
+            document.getElementById('captcha-container').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        } else {
+            alert('CAPTCHA verification failed. Please try again.');
+        }
+    });
+
+    let currentSong = null;
+    let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
+    const itemsPerPage = 5;
+    let currentPage = 1;
+    let isDarkTheme = false;
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+        isDarkTheme = !isDarkTheme;
+        document.body.classList.toggle('theme-dark', isDarkTheme);
+        document.getElementById('themeIcon').classList.toggle('fa-moon', !isDarkTheme);
+        document.getElementById('themeIcon').classList.toggle('fa-sun', isDarkTheme);
+    });
+
+    document.getElementById('chatToggle').addEventListener('click', () => {
+        document.getElementById('chatModal').classList.remove('hidden');
+    });
+
+    document.getElementById('sendButton').addEventListener('click', () => {
+        sendMessage();
+    });
+
+    document.getElementById('chatInput').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') sendMessage();
+    });
+
+    document.getElementById('clearButton').addEventListener('click', () => {
+        document.getElementById('chatContainer').innerHTML = '';
+    });
+
+    function closeChat() {
+        document.getElementById('chatModal').classList.add('hidden');
+    }
+
+    function closePreview() {
+        document.getElementById('previewModal').classList.add('hidden');
+    }
+
+    function search() {
+        const query = document.getElementById('searchInput').value.trim();
+        if (!query) return;
+
+        document.getElementById('loader').classList.remove('hidden');
+
+        axios.get(`https://api.example.com/search?q=${encodeURIComponent(query)}`)
+            .then(response => {
+                displayResults(response.data.tracks.items);
+            })
+            .catch(error => {
+                console.error(error);
+            })
+            .finally(() => {
+                document.getElementById('loader').classList.add('hidden');
+            });
+    }
+
+    function displayResults(results) {
+        const container = document.getElementById('results');
+        container.innerHTML = '';
+
+        results.forEach(track => {
+            const item = document.createElement('div');
+            item.classList.add('p-4', 'border', 'border-gray-300', 'rounded', 'mb-2', 'flex', 'justify-between', 'items-center', 'dark:bg-gray-700', 'dark:border-gray-600');
+            item.innerHTML = `
+                <div>
+                    <p class="font-bold">${track.name}</p>
+                    <p>${track.artists[0].name}</p>
+                </div>
+                <button onclick="showPreview(${track.id})" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Preview</button>
+            `;
+            container.appendChild(item);
         });
+    }
 
-        document.getElementById('chatToggle').addEventListener('click', () => {
-            document.getElementById('chatModal').classList.remove('hidden');
-        });
+    function showPreview(id) {
+        axios.get(`https://api.example.com/tracks/${id}`)
+            .then(response => {
+                const track = response.data;
 
-        document.getElementById('sendButton').addEventListener('click', sendMessage);
-        document.getElementById('clearButton').addEventListener('click', clearChat);
-
-        document.getElementById('verifyCaptchaButton').addEventListener('click', verifyCaptcha);
-
-        function verifyCaptcha() {
-            const captchaInput = document.getElementById('captchaInput').value;
-            if (captchaInput === '1234') { // Change this with your captcha validation logic
-                document.getElementById('captchaModal').classList.add('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-            } else {
-                Swal.fire('Error', 'Captcha is incorrect!', 'error');
-            }
-        }
-
-        function search() {
-            const query = document.getElementById('searchInput').value;
-            if (query) {
-                toggleLoader(true);
-                axios.get(`https://itunes.apple.com/search?term=${query}&limit=10`)
-                    .then(response => {
-                        displayResults(response.data.results);
-                        toggleLoader(false);
-                    })
-                    .catch(error => {
-                        console.error(error);
-                        toggleLoader(false);
-                    });
-            }
-        }
-
-        function toggleLoader(show) {
-            document.getElementById('loader').classList.toggle('hidden', !show);
-        }
-
-        function displayResults(songs) {
-            const results = document.getElementById('results');
-            results.innerHTML = '';
-            songs.forEach(song => {
-                const songElement = document.createElement('div');
-                songElement.classList.add('border', 'border-gray-300', 'p-4', 'rounded', 'mb-4', 'flex', 'justify-between', 'items-center');
-                songElement.innerHTML = `
-                    <div>
-                        <h3 class="text-lg font-bold">${song.trackName}</h3>
-                        <p class="text-gray-700">${song.artistName}</p>
-                    </div>
-                    <button onclick='previewSong(${JSON.stringify(song)})' class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-play"></i></button>
-                `;
-                results.appendChild(songElement);
-            });
-        }
-
-        function previewSong(song) {
-            currentSong = song;
-            document.getElementById('previewThumbnail').src = song.artworkUrl100;
-            document.getElementById('previewTitle').innerText = song.trackName;
-            document.getElementById('previewArtist').innerText = song.artistName;
-            document.getElementById('previewAlbum').innerText = song.collectionName;
-            const previewAudioContainer = document.getElementById('previewAudioContainer');
-            previewAudioContainer.innerHTML = '';
-            const audio = document.createElement('audio');
-            audio.src = song.previewUrl;
-            audio.controls = true;
-            previewAudioContainer.appendChild(audio);
-            document.getElementById('previewDownload').href = song.previewUrl;
-            document.getElementById('previewModal').classList.remove('hidden');
-        }
-
-        function closePreview() {
-            document.getElementById('previewModal').classList.add('hidden');
-        }
-
-        function saveToFavorites() {
-            if (currentSong && !favoriteSongs.some(song => song.trackId === currentSong.trackId)) {
-                favoriteSongs.push(currentSong);
-                localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-                displayFavorites();
-                closePreview();
-            }
-        }
-
-        function displayFavorites() {
-            const favoritesContainer = document.getElementById('favorites');
-            favoritesContainer.innerHTML = '';
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            const endIndex = startIndex + itemsPerPage;
-            const currentFavorites = favoriteSongs.slice(startIndex, endIndex);
-            currentFavorites.forEach(song => {
-                const songElement = document.createElement('div');
-                songElement.classList.add('border', 'border-gray-300', 'p-4', 'rounded', 'mb-4', 'flex', 'justify-between', 'items-center');
-                songElement.innerHTML = `
-                    <div>
-                        <h3 class="text-lg font-bold">${song.trackName}</h3>
-                        <p class="text-gray-700">${song.artistName}</p>
-                    </div>
-                    <button onclick='removeFromFavorites(${song.trackId})' class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300"><i class="fas fa-trash"></i></button>
-                `;
-                favoritesContainer.appendChild(songElement);
-            });
-            displayPagination();
-        }
-
-        function removeFromFavorites(trackId) {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "You won't be able to revert this!",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    favoriteSongs = favoriteSongs.filter(song => song.trackId !== trackId);
-                    localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-                    displayFavorites();
-                    Swal.fire('Deleted!', 'Your favorite song has been deleted.', 'success');
-                }
-            });
-        }
-
-        function displayPagination() {
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-            const totalPages = Math.ceil(favoriteSongs.length / itemsPerPage);
-            for (let i = 1; i <= totalPages; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.classList.add('px-4', 'py-2', 'rounded', 'mr-2', 'focus:outline-none');
-                if (i === currentPage) {
-                    pageButton.classList.add('bg-blue-500', 'text-white');
+                currentSong = track;
+                document.getElementById('previewTitle').textContent = track.name;
+                document.getElementById('previewArtist').textContent = track.artists[0].name;
+                document.getElementById('previewAlbum').textContent = track.album.name;
+                document.getElementById('previewThumbnail').src = track.album.images[0].url;
+                document.getElementById('previewDownload').href = track.preview_url;
+                
+                const audioContainer = document.getElementById('previewAudioContainer');
+                audioContainer.innerHTML = '';
+                if (track.preview_url) {
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = track.preview_url;
+                    audioContainer.appendChild(audio);
                 } else {
-                    pageButton.classList.add('bg-gray-300', 'text-gray-700', 'hover:bg-gray-400');
-                    pageButton.addEventListener('click', () => {
-                        currentPage = i;
-                        displayFavorites();
-                    });
+                    audioContainer.textContent = 'No preview available';
                 }
-                pageButton.innerText = i;
-                pagination.appendChild(pageButton);
+
+                document.getElementById('previewModal').classList.remove('hidden');
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    }
+
+    function saveToFavorites() {
+        if (currentSong && !favoriteSongs.some(song => song.id === currentSong.id)) {
+            favoriteSongs.push(currentSong);
+            localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+            alert('Song added to favorites');
+            renderFavorites();
+        }
+    }
+
+    function renderFavorites() {
+        const container = document.getElementById('favorites');
+        container.innerHTML = '';
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        const pageItems = favoriteSongs.slice(startIndex, endIndex);
+
+        pageItems.forEach(song => {
+            const item = document.createElement('div');
+            item.classList.add('p-4', 'border', 'border-gray-300', 'rounded', 'mb-2', 'flex', 'justify-between', 'items-center', 'dark:bg-gray-700', 'dark:border-gray-600');
+            item.innerHTML = `
+                <div>
+                    <p class="font-bold">${song.name}</p>
+                    <p>${song.artists[0].name}</p>
+                </div>
+                <button onclick="deleteSong('${song.id}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300">Delete</button>
+            `;
+            container.appendChild(item);
+        });
+
+        renderPagination();
+    }
+
+    function renderPagination() {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        const totalPages = Math.ceil(favoriteSongs.length / itemsPerPage);
+
+        for (let i = 1; i <= totalPages; i++) {
+            const button = document.createElement('button');
+            button.classList.add('px-4', 'py-2', 'rounded', 'mx-1', 'focus:outline-none', 'focus:ring');
+            if (i === currentPage) {
+                button.classList.add('bg-blue-500', 'text-white');
+            } else {
+                button.classList.add('bg-gray-200', 'hover:bg-gray-300', 'dark:bg-gray-600', 'dark:hover:bg-gray-500');
             }
+            button.textContent = i;
+            button.addEventListener('click', () => {
+                currentPage = i;
+                renderFavorites();
+            });
+            pagination.appendChild(button);
         }
+    }
 
-        function sendMessage() {
-            const chatInput = document.getElementById('chatInput');
-            const message = chatInput.value;
-            if (message) {
-                const chatContainer = document.getElementById('chatContainer');
-                const messageElement = document.createElement('div');
-                messageElement.classList.add('bg-gray-300', 'p-2', 'rounded', 'mb-2', 'self-end', 'max-w-xs');
-                messageElement.innerText = message;
-                chatContainer.appendChild(messageElement);
-                chatInput.value = '';
-                // Send message to the server (mock)
-                setTimeout(() => {
-                    const replyElement = document.createElement('div');
-                    replyElement.classList.add('bg-blue-500', 'text-white', 'p-2', 'rounded', 'mb-2', 'self-start', 'max-w-xs');
-                    replyElement.innerText = 'This is a reply from the bot.';
-                    chatContainer.appendChild(replyElement);
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                }, 1000);
+    function deleteSong(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to delete this song from favorites?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                favoriteSongs = favoriteSongs.filter(song => song.id !== id);
+                localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+                renderFavorites();
+                Swal.fire(
+                    'Deleted!',
+                    'The song has been deleted from your favorites.',
+                    'success'
+                );
             }
-        }
+        });
+    }
 
-        function clearChat() {
-            const chatContainer = document.getElementById('chatContainer');
-            chatContainer.innerHTML = '';
-        }
+    renderFavorites();
+</script>
 
-        function closeChat() {
-            document.getElementById('chatModal').classList.add('hidden');
-        }
-
-        // Initialize the favorites list
-        displayFavorites();
-    </script>
 </body>
 </html>
