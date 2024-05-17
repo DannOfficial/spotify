@@ -133,7 +133,7 @@
 
             axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(chatInput)}`, {
                 headers: {
-                    'X-Request-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json',
                     'Accept': '*/*'
                 }
             })
