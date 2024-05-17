@@ -124,31 +124,31 @@
     let isDarkTheme = false;
     let captchaCode;
 
-    function generateCaptcha() {
-      const canvas = document.getElementById('captchaCanvas');
-      const context = canvas.getContext('2d');
-      context.clearRect(0, 0, canvas.width, canvas.height);
+function generateCaptcha() {
+  const canvas = document.getElementById('captchaCanvas');
+  const context = canvas.getContext('2d');
+  context.clearRect(0, 0, canvas.width, canvas.height);
 
-      captchaCode = Math.random().toString(36).substring(2, 8);
-      context.font = '30px Arial';
-      context.fillStyle = '#000';
-      context.fillText(captchaCode, 50, 35);
-    }
+  captchaCode = Math.random().toString(36).substring(2, 8);
+  context.font = '30px Arial';
+  context.fillStyle = '#000';
+  context.fillText(captchaCode, 50, 35);
+}
 
-    function validateCaptcha() {
-      const userInput = document.getElementById('captchaInput').value;
-      if (userInput === captchaCode) {
-        document.getElementById('captchaModal').classList.add('hidden');
-      } else {
-        alert('Captcha tidak sesuai. Silakan coba lagi.');
-        generateCaptcha();
-      }
-    }
+function validateCaptcha() {
+  const userInput = document.getElementById('captchaInput').value;
+  if (userInput === captchaCode) {
+    document.getElementById('captchaModal').classList.add('hidden');
+  } else {
+    alert('Captcha tidak sesuai. Silakan coba lagi.');
+    generateCaptcha();
+  }
+}
 
-    document.addEventListener('DOMContentLoaded', function() {
-      generateCaptcha();
-      document.getElementById('captchaModal').classList.remove('hidden');
-    });
+document.addEventListener('DOMContentLoaded', function() {
+  generateCaptcha();
+  document.getElementById('captchaModal').classList.remove('hidden');
+});
 
     document.getElementById('themeToggle').addEventListener('click', () => {
       isDarkTheme = !isDarkTheme;
