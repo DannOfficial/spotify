@@ -42,7 +42,7 @@
       <button onclick="validateCaptcha()" class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Submit</button>
     </div>
   </div>
-  <div class="container mx-auto py-10">
+  <div class="container mx-auto py-10 hidden" id="mainContent">
     <div class="p-8">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-center flex items-center justify-center">
@@ -136,6 +136,7 @@
       const userInput = document.getElementById('captchaInput').value;
       if (userInput === captchaCode) {
         document.getElementById('captchaModal').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('hidden');
       } else {
         alert('Captcha tidak sesuai. Silakan coba lagi.');
         generateCaptcha();
@@ -147,16 +148,20 @@
       document.getElementById('captchaModal').classList.remove('hidden');
     });
 
-    document.getElementById('themeToggle').addEventListener('click', () => {
+    document.getElementById('themeToggle').addEventListener('click', function() {
       isDarkTheme = !isDarkTheme;
-      if (isDarkTheme) {
-        document.documentElement.classList.add('theme-dark');
-        document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun');
-      } else {
-        document.documentElement.classList.remove('theme-dark');
-        document.getElementById('themeIcon').classList.replace('fa-sun', 'fa-moon');
-      }
+      document.documentElement.classList.toggle('theme-dark', isDarkTheme);
+      document.getElementById('themeIcon').classList.toggle('fa-moon', !isDarkTheme);
+      document.getElementById('themeIcon').classList.toggle('fa-sun', isDarkTheme);
     });
+
+    document.getElementById('chatToggle').addEventListener('click', function() {
+      document.getElementById('chatModal').classList.remove('hidden');
+    });
+
+    function closeChat() {
+      document.getElementById('chatModal').classList.add('hidden');
+    }
 
     function search() {
       const query = document.getElementById('searchInput').value;
@@ -167,57 +172,58 @@
       document.getElementById('loader').classList.remove('hidden');
       axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track`, {
         headers: {
-          'Authorization': 'Bearer BQCy4uXWXFoGzRTxU9HJPf...'
+          'Authorization': `Bearer ${accessToken}`
         }
       })
       .then(response => {
-        const resultsContainer = document.getElementById('results');
-        resultsContainer.innerHTML = '';
-        response.data.tracks.items.forEach(track => {
-          const trackElement = document.createElement('div');
-          trackElement.classList.add('flex', 'items-center', 'justify-between', 'p-4', 'bg-white', 'shadow-md', 'rounded-md', 'mb-4', 'dark:bg-gray-700');
-          trackElement.innerHTML = `
-            <div>
-              <img src="${track.album.images[0].url}" alt="Album Art" class="w-16 h-16 rounded-md mr-4">
-            </div>
-            <div class="flex-1">
-              <h3 class="text-lg font-bold">${track.name}</h3>
-              <p>${track.artists.map(artist => artist.name).join(', ')}</p>
-            </div>
-            <div>
-              <button onclick="showPreview('${track.id}')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-play"></i></button>
-            </div>
-          `;
-          resultsContainer.appendChild(trackElement);
-        });
+        document.getElementById('loader').classList.add('hidden');
+        displayResults(response.data.tracks.items);
       })
       .catch(error => {
-        Swal.fire('Error', 'Failed to fetch search results.', 'error');
-      })
-      .finally(() => {
         document.getElementById('loader').classList.add('hidden');
+        Swal.fire('Error', 'Failed to fetch data from Spotify API.', 'error');
+      });
+    }
+
+    function displayResults(results) {
+      const resultsContainer = document.getElementById('results');
+      resultsContainer.innerHTML = '';
+      results.forEach(track => {
+        const card = document.createElement('div');
+        card.className = 'p-4 bg-white rounded shadow-md mb-4 dark:bg-gray-800';
+        card.innerHTML = `
+          <div class="flex items-center">
+            <img src="${track.album.images[0].url}" alt="Album Cover" class="w-16 h-16 rounded mr-4">
+            <div>
+              <h3 class="text-lg font-bold">${track.name}</h3>
+              <p class="text-gray-600 dark:text-gray-400">${track.artists[0].name}</p>
+            </div>
+            <button onclick="showPreview(${track.id})" class="ml-auto bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300"><i class="fas fa-play"></i></button>
+          </div>
+        `;
+        resultsContainer.appendChild(card);
       });
     }
 
     function showPreview(trackId) {
       axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
         headers: {
-          'Authorization': 'Bearer BQCy4uXWXFoGzRTxU9HJPf...'
+          'Authorization': `Bearer ${accessToken}`
         }
       })
       .then(response => {
-        currentSong = response.data;
-        document.getElementById('previewThumbnail').src = currentSong.album.images[0].url;
-        document.getElementById('previewTitle').textContent = currentSong.name;
-        document.getElementById('previewArtist').textContent = currentSong.artists.map(artist => artist.name).join(', ');
-        document.getElementById('previewAlbum').textContent = currentSong.album.name;
-        document.getElementById('previewDownload').href = `https://api.spotify.com/v1/tracks/${trackId}/download`;  // Note: Replace this with the actual download link if available
-        const previewAudioContainer = document.getElementById('previewAudioContainer');
-        previewAudioContainer.innerHTML = `<audio controls src="${currentSong.preview_url}" class="w-full mt-4"></audio>`;
+        const track = response.data;
+        currentSong = track;
+        document.getElementById('previewThumbnail').src = track.album.images[0].url;
+        document.getElementById('previewTitle').textContent = track.name;
+        document.getElementById('previewArtist').textContent = track.artists[0].name;
+        document.getElementById('previewAlbum').textContent = track.album.name;
+        document.getElementById('previewDownload').href = track.preview_url;
+        document.getElementById('previewAudioContainer').innerHTML = `<audio controls src="${track.preview_url}" class="w-full"></audio>`;
         document.getElementById('previewModal').classList.remove('hidden');
       })
       .catch(error => {
-        Swal.fire('Error', 'Failed to fetch track details.', 'error');
+        Swal.fire('Error', 'Failed to fetch track details from Spotify API.', 'error');
       });
     }
 
@@ -226,98 +232,69 @@
     }
 
     function saveToFavorites() {
-      if (!favoriteSongs.some(song => song.id === currentSong.id)) {
+      if (currentSong && !favoriteSongs.some(song => song.id === currentSong.id)) {
         favoriteSongs.push(currentSong);
         localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
         Swal.fire('Success', 'Song added to favorites.', 'success');
-        displayFavorites();
       } else {
-        Swal.fire('Info', 'Song is already in favorites.', 'info');
+        Swal.fire('Error', 'Song is already in favorites.', 'error');
       }
     }
 
-    function displayFavorites() {
+    function renderFavorites() {
       const favoritesContainer = document.getElementById('favorites');
       favoritesContainer.innerHTML = '';
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const endIndex = Math.min(startIndex + itemsPerPage, favoriteSongs.length);
-      for (let i = startIndex; i < endIndex; i++) {
-        const song = favoriteSongs[i];
-        const songElement = document.createElement('div');
-        songElement.classList.add('flex', 'items-center', 'justify-between', 'p-4', 'bg-white', 'shadow-md', 'rounded-md', 'mb-4', 'dark:bg-gray-700');
-        songElement.innerHTML = `
-          <div>
-            <img src="${song.album.images[0].url}" alt="Album Art" class="w-16 h-16 rounded-md mr-4">
-          </div>
-          <div class="flex-1">
-            <h3 class="text-lg font-bold">${song.name}</h3>
-            <p>${song.artists.map(artist => artist.name).join(', ')}</p>
-          </div>
-          <div>
-            <button onclick="removeFromFavorites('${song.id}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300"><i class="fas fa-trash"></i></button>
+      favoriteSongs.forEach(song => {
+        const card = document.createElement('div');
+        card.className = 'p-4 bg-white rounded shadow-md mb-4 dark:bg-gray-800';
+        card.innerHTML = `
+          <div class="flex items-center">
+            <img src="${song.album.images[0].url}" alt="Album Cover" class="w-16 h-16 rounded mr-4">
+            <div>
+              <h3 class="text-lg font-bold">${song.name}</h3>
+              <p class="text-gray-600 dark:text-gray-400">${song.artists[0].name}</p>
+            </div>
+            <button onclick="showPreview(${song.id})" class="ml-auto bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300"><i class="fas fa-play"></i></button>
           </div>
         `;
-        favoritesContainer.appendChild(songElement);
-      }
-
-      const paginationContainer = document.getElementById('pagination');
-      paginationContainer.innerHTML = '';
-      for (let i = 1; i <= Math.ceil(favoriteSongs.length / itemsPerPage); i++) {
-        const pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        pageButton.classList.add('px-4', 'py-2', 'border', 'rounded-md', 'mx-1', currentPage === i ? 'bg-blue-500 text-white' : 'bg-white');
-        pageButton.addEventListener('click', () => {
-          currentPage = i;
-          displayFavorites();
-        });
-        paginationContainer.appendChild(pageButton);
-      }
+        favoritesContainer.appendChild(card);
+      });
     }
 
-    function removeFromFavorites(trackId) {
-      favoriteSongs = favoriteSongs.filter(song => song.id !== trackId);
-      localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-      Swal.fire('Success', 'Song removed from favorites.', 'success');
-      displayFavorites();
-    }
-
-    document.getElementById('chatToggle').addEventListener('click', () => {
-      document.getElementById('chatModal').classList.remove('hidden');
+    document.getElementById('sendButton').addEventListener('click', function() {
+      const message = document.getElementById('chatInput').value;
+      if (!message) return;
+      addChatMessage('user', message);
+      axios.post('https://api.example.com/chat', { message })
+      .then(response => {
+        addChatMessage('bot', response.data.reply);
+      })
+      .catch(error => {
+        addChatMessage('bot', 'Error: Could not process your message.');
+      });
     });
 
-    function closeChat() {
-      document.getElementById('chatModal').classList.add('hidden');
-    }
+    document.getElementById('clearButton').addEventListener('click', function() {
+      document.getElementById('chatContainer').innerHTML = '';
+    });
 
-    document.getElementById('sendButton').addEventListener('click', () => {
-      const chatInput = document.getElementById('chatInput');
+    function addChatMessage(sender, message) {
       const chatContainer = document.getElementById('chatContainer');
-      const userMessage = chatInput.value;
-      if (userMessage.trim()) {
-        const userMessageElement = document.createElement('div');
-        userMessageElement.classList.add('bg-blue-500', 'text-white', 'p-2', 'rounded-md', 'mb-2', 'self-end', 'max-w-xs');
-        userMessageElement.textContent = userMessage;
-        chatContainer.appendChild(userMessageElement);
-        chatContainer.scrollTop = chatContainer.scrollHeight;
-        chatInput.value = '';
+      const messageElement = document.createElement('div');
+      messageElement.className = `p-2 mb-2 rounded ${sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`;
+      messageElement.textContent = message;
+      chatContainer.appendChild(messageElement);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
 
-        setTimeout(() => {
-          const botMessageElement = document.createElement('div');
-          botMessageElement.classList.add('bg-gray-300', 'text-gray-800', 'p-2', 'rounded-md', 'mb-2', 'self-start', 'max-w-xs');
-          botMessageElement.textContent = 'Bot: ' + userMessage;  // Simulated bot response
-          chatContainer.appendChild(botMessageElement);
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 500);
+    document.addEventListener('DOMContentLoaded', function() {
+      if (localStorage.getItem('theme') === 'dark') {
+        isDarkTheme = true;
+        document.documentElement.classList.add('theme-dark');
+        document.getElementById('themeIcon').classList.remove('fa-moon');
+        document.getElementById('themeIcon').classList.add('fa-sun');
       }
-    });
-
-    document.getElementById('clearButton').addEventListener('click', () => {
-      const chatContainer = document.getElementById('chatContainer');
-      chatContainer.innerHTML = '';
-    });
-
-    document.addEventListener('DOMContentLoaded', () => {
-      displayFavorites();
+      renderFavorites();
     });
   </script>
 </body>
