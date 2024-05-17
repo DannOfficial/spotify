@@ -186,7 +186,7 @@
 
         document.getElementById('loader').classList.remove('hidden');
 
-        axios.get(`https://api.example.com/search?q=${encodeURIComponent(query)}`)
+        axios.get(`https://spotifyapi.caliphdev.com/api/search/tracks?q=${query}`)
             .then(response => {
                 displayResults(response.data.tracks.items);
             })
