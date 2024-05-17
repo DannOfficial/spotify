@@ -356,10 +356,20 @@
         }
 
         function removeFromFavorites(index) {
-            favoriteSongs.splice(index, 1);
-            localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-            displayFavorites();
-        }
+        Swal.fire({
+            title: 'Apakah anda yakin menghapus lagu ini?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus',
+            cancelButtonText: 'Batal'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                favoriteSongs.splice(index, 1);
+                localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+                displayFavorites();
+            }
+        });
+    }
 
         function renderPagination() {
             const paginationDiv = document.getElementById('pagination');
