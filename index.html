@@ -168,7 +168,7 @@
       document.getElementById('loader').classList.remove('hidden');
       axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {
         headers: {
-          Authorization: 'Bearer YOUR_SPOTIFY_API_TOKEN'
+          Authorization: 'Bearer ZTVjZDI4MGI2ZDA2NGIxYmEzYzZlZjM5ZDFmNDdhODg6Yjg5NjcyYjNmZTY4NGU0ODk5NDk1ZDgzN2IyODA0MWE='
         }
       })
       .then(response => {
@@ -208,7 +208,7 @@
     function previewSong(index) {
       axios.get(`https://api.spotify.com/v1/tracks/${results[index].id}`, {
         headers: {
-          Authorization: 'Bearer YOUR_SPOTIFY_API_TOKEN'
+          Authorization: 'Bearer ZTVjZDI4MGI2ZDA2NGIxYmEzYzZlZjM5ZDFmNDdhODg6Yjg5NjcyYjNmZTY4NGU0ODk5NDk1ZDgzN2IyODA0MWE='
         }
       })
       .then(response => {
