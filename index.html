@@ -1,3 +1,6 @@
+<!-- DannTeam || Spotify -->
+<!-- www.spotify.dannteam.com -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +9,6 @@
     <title>Spotify Search - DannTeam</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.7/dist/sweetalert2.min.css">
     <style>
         .theme-dark {
             background-color: #1a202c;
@@ -28,7 +30,6 @@
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10.16.7/dist/sweetalert2.all.min.js"></script>
 </head>
 <body class="bg-gray-200">
     <div class="container mx-auto py-10">
@@ -47,26 +48,17 @@
                     </button>
                 </div>
             </div>
-            <!-- CAPTCHA Section -->
-            <div class="mb-6 text-center">
-                <div id="captchaImage" class="text-3xl font-bold mb-4"></div>
-                <input type="text" id="captchaInput" placeholder="Enter CAPTCHA" class="border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
-                <button onclick="validateCaptcha()" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 ml-2">Submit</button>
+            <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
+                <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
+                <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-search"></i></button>
             </div>
-            <!-- Main Content -->
-            <div id="mainContent" class="hidden">
-                <div class="relative grid grid-cols-12 gap-4 mx-auto max-w-md">
-                    <input type="text" id="searchInput" placeholder="Search..." class="col-span-9 border border-gray-300 px-4 py-2 rounded-l-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
-                    <button onclick="search()" class="col-span-3 bg-blue-500 text-white px-4 py-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-search"></i></button>
-                </div>
-                <div id="loader" class="hidden flex items-center justify-center mt-5">
-                    <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
-                </div>
-                <div id="results" class="mt-5"></div>
-                <h2 class="text-2xl font-bold mt-10">List Favorite</h2>
-                <div id="favorites" class="mt-5"></div>
-                <div id="pagination" class="flex justify-center mt-5"></div>
+            <div id="loader" class="hidden flex items-center justify-center mt-5">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
             </div>
+            <div id="results" class="mt-5"></div>
+            <h2 class="text-2xl font-bold mt-10">List Favorite</h2>
+            <div id="favorites" class="mt-5"></div>
+            <div id="pagination" class="flex justify-center mt-5"></div>
         </div>
     </div>
 
@@ -91,6 +83,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Chat Modal -->
     <div id="chatModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
@@ -117,7 +110,6 @@
         const itemsPerPage = 5;
         let currentPage = 1;
         let isDarkTheme = false;
-        let captchaValue = Math.floor(Math.random() * 10000);
 
         document.getElementById('themeToggle').addEventListener('click', () => {
             isDarkTheme = !isDarkTheme;
@@ -141,267 +133,219 @@
 
             axios.get(`https://tools.revesery.com/ai/ai.php?query=${encodeURIComponent(chatInput)}`, {
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Request-With': 'XMLHttpRequest',
+                    'Accept': '*/*'
                 }
-            }).then(response => {
-                addChatMessage(response.data, 'bot');
-            }).catch(error => {
-                console.error('Error:', error);
-                addChatMessage('Maaf, terjadi kesalahan. Silakan coba lagi.', 'bot');
-            });
+            })
+            .then(data => {
+                addChatMessage(data.result, 'bot');
+            })
+            .catch(error => console.error(error));
 
             document.getElementById('chatInput').value = '';
+        }
+
+        function addChatMessage(message, sender) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('flex', 'items-start', 'mb-4');
+            const avatar = document.createElement('div');
+            avatar.classList.add('w-8', 'h-8', 'rounded-full', 'bg-gray-300', 'flex', 'items-center', 'justify-center', 'mr-2');
+            avatar.textContent = sender === 'user' ? 'U' : 'B';
+            const messageContent = document.createElement('div');
+            messageContent.classList.add('p-3', 'rounded-lg', 'bg-gray-200', 'dark:bg-gray-600', 'dark:text-white');
+            messageContent.textContent = message;
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(messageContent);
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
         function clearChat() {
             document.getElementById('chatContainer').innerHTML = '';
         }
 
-        function addChatMessage(message, sender) {
-            const chatContainer = document.getElementById('chatContainer');
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('mb-2', 'p-2', 'rounded-md', 'max-w-xs');
-            messageElement.classList.add(sender === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-gray-900 self-start');
-            messageElement.textContent = message;
-            chatContainer.appendChild(messageElement);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
         function closeChat() {
             document.getElementById('chatModal').classList.add('hidden');
         }
 
-        function validateCaptcha() {
-            const captchaInput = document.getElementById('captchaInput').value;
-            if (parseInt(captchaInput) === captchaValue) {
-                document.getElementById('mainContent').classList.remove('hidden');
-                document.getElementById('captchaInput').value = '';
-                document.getElementById('captchaInput').disabled = true;
-                document.getElementById('captchaInput').style.display = 'none';
-                document.getElementById('captchaImage').style.display = 'none';
-                captchaValue = Math.floor(Math.random() * 10000); // Reset CAPTCHA
-            } else {
-                alert('CAPTCHA Salah, coba lagi.');
-                captchaValue = Math.floor(Math.random() * 10000); // Reset CAPTCHA
-                generateCaptcha();
-            }
-        }
-
-        function generateCaptcha() {
-            document.getElementById('captchaImage').textContent = captchaValue;
-        }
-
-        generateCaptcha();
-
         function search() {
             const query = document.getElementById('searchInput').value;
-            if (!query) return;
+            const url = 'https://spotifyapi.caliphdev.com/api/search/tracks?q=' + encodeURIComponent(query);
 
             document.getElementById('loader').classList.remove('hidden');
 
-            axios.get(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track`, {
-                headers: {
-                    'Authorization': 'Bearer YOUR_ACCESS_TOKEN'  // Replace with your actual Spotify API token
-                }
-            }).then(response => {
-                displayResults(response.data.tracks.items);
-            }).catch(error => {
-                console.error('Error:', error);
-            }).finally(() => {
-                document.getElementById('loader').classList.add('hidden');
-            });
+            axios.get(url)
+                .then(response => {
+                    document.getElementById('loader').classList.add('hidden');
+                    const resultsDiv = document.getElementById('results');
+                    resultsDiv.innerHTML = '';
+
+                    response.data.forEach(song => {
+                        const resultItem = document.createElement('div');
+                        resultItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
+
+                        const thumbnail = document.createElement('img');
+                        thumbnail.src = song.thumbnail;
+                        thumbnail.classList.add('w-24', 'h-24', 'mr-4');
+                        resultItem.appendChild(thumbnail);
+
+                        const songInfo = document.createElement('div');
+                        const title = document.createElement('h3');
+                        title.textContent = song.title;
+                        title.classList.add('text-lg', 'font-bold', 'mb-1');
+                        songInfo.appendChild(title);
+
+                        const artist = document.createElement('p');
+                        artist.textContent = `Artist: ${song.artist}`;
+                        artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
+                        songInfo.appendChild(artist);
+
+                        const album = document.createElement('p');
+                        album.textContent = `Album: ${song.album}`;
+                        album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
+                        songInfo.appendChild(album);
+
+                        const previewBtn = document.createElement('button');
+                        previewBtn.innerHTML = '<i class="fas fa-play"></i> Preview';
+                        previewBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300', 'mr-4');
+                        previewBtn.onclick = function() {
+                            openPreview(song);
+                        };
+                        songInfo.appendChild(previewBtn);
+
+                        resultItem.appendChild(songInfo);
+                        resultsDiv.appendChild(resultItem);
+                    });
+                })
+                .catch(error => {
+                    document.getElementById('loader').classList.add('hidden');
+                    console.error('Terjadi kesalahan:', error);
+                });
         }
 
-        function displayResults(tracks) {
-            const resultsContainer = document.getElementById('results');
-            resultsContainer.innerHTML = '';
+        function openPreview(song) {
+            currentSong = song;
+            const modal = document.getElementById('previewModal');
+            modal.classList.remove('hidden');
 
-            tracks.forEach(track => {
-                const resultItem = document.createElement('div');
-                resultItem.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'mb-4', 'flex', 'items-center', 'space-x-4', 'dark:bg-gray-800', 'dark:text-white');
+            document.getElementById('previewThumbnail').src = song.thumbnail;
+            document.getElementById('previewTitle').textContent = song.title;
+            document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
+            document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
 
-                const img = document.createElement('img');
-                img.src = track.album.images[0].url;
-                img.alt = 'Album cover';
-                img.classList.add('w-16', 'h-16', 'rounded-md');
+            const audioContainer = document.getElementById('previewAudioContainer');
+            audioContainer.innerHTML = `
+                <audio controls class="w-full mb-4">
+                    <source src="https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}" type="audio/mp3">
+                    Your browser does not support the audio element.
+                </audio>
+            `;
 
-                const info = document.createElement('div');
-                info.classList.add('flex-1');
-
-                const title = document.createElement('h3');
-                title.classList.add('text-lg', 'font-bold');
-                title.textContent = track.name;
-
-                const artist = document.createElement('p');
-                artist.classList.add('text-gray-700', 'dark:text-gray-400');
-                artist.textContent = `Artist: ${track.artists[0].name}`;
-
-                const album = document.createElement('p');
-                album.classList.add('text-gray-700', 'dark:text-gray-400');
-                album.textContent = `Album: ${track.album.name}`;
-
-                info.appendChild(title);
-                info.appendChild(artist);
-                info.appendChild(album);
-
-                const button = document.createElement('button');
-                button.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300');
-                button.textContent = 'Preview';
-                button.onclick = () => previewTrack(track);
-
-                resultItem.appendChild(img);
-                resultItem.appendChild(info);
-                resultItem.appendChild(button);
-
-                resultsContainer.appendChild(resultItem);
-            });
-        }
-
-        function previewTrack(track) {
-            currentSong = track;
-
-            document.getElementById('previewThumbnail').src = track.album.images[0].url;
-            document.getElementById('previewTitle').textContent = track.name;
-            document.getElementById('previewArtist').textContent = `Artist: ${track.artists[0].name}`;
-            document.getElementById('previewAlbum').textContent = `Album: ${track.album.name}`;
-            document.getElementById('previewDownload').href = track.preview_url;
-
-            const previewAudioContainer = document.getElementById('previewAudioContainer');
-            previewAudioContainer.innerHTML = '';
-
-            if (track.preview_url) {
-                const audio = document.createElement('audio');
-                audio.src = track.preview_url;
-                audio.controls = true;
-                previewAudioContainer.appendChild(audio);
-            } else {
-                previewAudioContainer.textContent = 'No preview available';
-            }
-
-            document.getElementById('previewModal').classList.remove('hidden');
-        }
-
-        function saveToFavorites() {
-            if (!currentSong) return;
-
-            favoriteSongs.push(currentSong);
-            localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-            displayFavorites();
-            Swal.fire({
-                title: 'Berhasil!',
-                text: 'Lagu berhasil disimpan ke favorit',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            });
-            closePreview();
-        }
-
-        function deleteFavorite(index) {
-            Swal.fire({
-                title: 'Anda yakin?',
-                text: "Lagu ini akan dihapus dari daftar favorit Anda.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Ya, hapus!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    favoriteSongs.splice(index, 1);
-                    localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-                    displayFavorites();
-                    Swal.fire(
-                        'Dihapus!',
-                        'Lagu telah dihapus dari daftar favorit Anda.',
-                        'success'
-                    );
-                }
-            });
-        }
-
-        function displayFavorites() {
-            const favoritesContainer = document.getElementById('favorites');
-            favoritesContainer.innerHTML = '';
-
-            const paginatedFavorites = paginate(favoriteSongs, itemsPerPage, currentPage);
-
-            paginatedFavorites.forEach((song, index) => {
-                const favoriteItem = document.createElement('div');
-                favoriteItem.classList.add('bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'mb-4', 'flex', 'items-center', 'space-x-4', 'dark:bg-gray-800', 'dark:text-white');
-
-                const img = document.createElement('img');
-                img.src = song.album.images[0].url;
-                img.alt = 'Album cover';
-                img.classList.add('w-16', 'h-16', 'rounded-md');
-
-                const info = document.createElement('div');
-                info.classList.add('flex-1');
-
-                const title = document.createElement('h3');
-                title.classList.add('text-lg', 'font-bold');
-                title.textContent = song.name;
-
-                const artist = document.createElement('p');
-                artist.classList.add('text-gray-700', 'dark:text-gray-400');
-                artist.textContent = `Artist: ${song.artists[0].name}`;
-
-                const album = document.createElement('p');
-                album.classList.add('text-gray-700', 'dark:text-gray-400');
-                album.textContent = `Album: ${song.album.name}`;
-
-                info.appendChild(title);
-                info.appendChild(artist);
-                info.appendChild(album);
-
-                const button = document.createElement('button');
-                button.classList.add('bg-red-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring', 'focus:border-red-300');
-                button.textContent = 'Delete';
-                button.onclick = () => deleteFavorite(index);
-
-                favoriteItem.appendChild(img);
-                favoriteItem.appendChild(info);
-                favoriteItem.appendChild(button);
-
-                favoritesContainer.appendChild(favoriteItem);
-            });
-
-            displayPagination(favoriteSongs.length, itemsPerPage, currentPage);
-        }
-
-        function paginate(items, itemsPerPage, page) {
-            const start = (page - 1) * itemsPerPage;
-            return items.slice(start, start + itemsPerPage);
-        }
-
-        function displayPagination(totalItems, itemsPerPage, currentPage) {
-            const paginationContainer = document.getElementById('pagination');
-            paginationContainer.innerHTML = '';
-
-            const totalPages = Math.ceil(totalItems / itemsPerPage);
-
-            for (let i = 1; i <= totalPages; i++) {
-                const pageButton = document.createElement('button');
-                pageButton.classList.add('px-3', 'py-1', 'rounded', 'focus:outline-none');
-                if (i === currentPage) {
-                    pageButton.classList.add('bg-blue-500', 'text-white');
-                } else {
-                    pageButton.classList.add('bg-gray-200', 'text-gray-700', 'hover:bg-gray-300');
-                }
-                pageButton.textContent = i;
-                pageButton.onclick = () => {
-                    currentPage = i;
-                    displayFavorites();
-                };
-
-                paginationContainer.appendChild(pageButton);
-            }
+            document.getElementById('previewDownload').href = `https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`;
         }
 
         function closePreview() {
-            document.getElementById('previewModal').classList.add('hidden');
+            const modal = document.getElementById('previewModal');
+            modal.classList.add('hidden');
         }
 
-        displayFavorites();
+        function saveToFavorites() {
+            if (currentSong && !favoriteSongs.some(song => song.url === currentSong.url)) {
+                favoriteSongs.push(currentSong);
+                localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+                displayFavorites();
+                closePreview();
+            }
+        }
+
+        function displayFavorites() {
+            const favoritesDiv = document.getElementById('favorites');
+            favoritesDiv.innerHTML = '';
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const currentFavorites = favoriteSongs.slice(start, end);
+
+            currentFavorites.forEach((song, index) => {
+                const favoriteItem = document.createElement('div');
+                favoriteItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
+
+                const thumbnail = document.createElement('img');
+                thumbnail.src = song.thumbnail;
+                thumbnail.classList.add('w-24', 'h-24', 'mr-4');
+                favoriteItem.appendChild(thumbnail);
+
+                const songInfo = document.createElement('div');
+                const title = document.createElement('h3');
+                title.textContent = song.title;
+                title.classList.add('text-lg', 'font-bold', 'mb-1');
+                songInfo.appendChild(title);
+
+                const artist = document.createElement('p');
+                artist.textContent = `Artist: ${song.artist}`;
+                artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
+                songInfo.appendChild(artist);
+
+                const album = document.createElement('p');
+                album.textContent = `Album: ${song.album}`;
+                album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
+                songInfo.appendChild(album);
+
+                const playBtn = document.createElement('button');
+                playBtn.innerHTML = '<i class="fas fa-play"></i>';
+                playBtn.classList.add('bg-green-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-green-600', 'focus:outline-none', 'focus:ring', 'focus:border-green-300', 'mr-2');
+                playBtn.onclick = function() {
+                    openPreview(song);
+                };
+                songInfo.appendChild(playBtn);
+
+                const removeBtn = document.createElement('button');
+                removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                removeBtn.classList.add('bg-red-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring', 'focus:border-red-300');
+                removeBtn.onclick = function() {
+                    removeFromFavorites(start + index);
+                };
+                songInfo.appendChild(removeBtn);
+
+                favoriteItem.appendChild(songInfo);
+                favoritesDiv.appendChild(favoriteItem);
+            });
+
+            renderPagination();
+        }
+
+        function removeFromFavorites(index) {
+            favoriteSongs.splice(index, 1);
+            localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+            displayFavorites();
+        }
+
+        function renderPagination() {
+            const paginationDiv = document.getElementById('pagination');
+            paginationDiv.innerHTML = '';
+
+            const totalPages = Math.ceil(favoriteSongs.length / itemsPerPage);
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.textContent = i;
+                pageBtn.classList.add('mx-1', 'px-3', 'py-1', 'rounded', 'border', 'focus:outline-none', 'focus:ring');
+                if (i === currentPage) {
+                    pageBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
+                } else {
+                    pageBtn.classList.add('bg-white', 'text-gray-900', 'dark:bg-gray-700', 'dark:text-white');
+                    pageBtn.onclick = function() {
+                        currentPage = i;
+                        displayFavorites();
+                    };
+                }
+                paginationDiv.appendChild(pageBtn);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayFavorites();
+        });
     </script>
 </body>
 </html>
