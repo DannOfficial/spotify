@@ -42,7 +42,8 @@
       <button onclick="validateCaptcha()" class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Submit</button>
     </div>
   </div>
-  <div class="container mx-auto py-10 hidden" id="mainContent">
+  
+  <div id="content" class="container mx-auto py-10 hidden">
     <div class="p-8">
       <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-center flex items-center justify-center">
@@ -119,9 +120,8 @@
     const itemsPerPage = 5;
     let currentPage = 1;
     let isDarkTheme = false;
-    let accessToken = 'BQAaP7A1wVTeppc7i9iJwZDExcLv-C41t5rQfmaApBaxHWpoZ0Puz4vrVUenp98B_onDWU-1k5VRDecLXtIBiDJuitJYy2ixiU0RDdWIIBrxaHfonk4'
     let captchaCode;
-    
+
     function generateCaptcha() {
       const canvas = document.getElementById('captchaCanvas');
       const context = canvas.getContext('2d');
@@ -137,165 +137,217 @@
       const userInput = document.getElementById('captchaInput').value;
       if (userInput === captchaCode) {
         document.getElementById('captchaModal').classList.add('hidden');
-        document.getElementById('mainContent').classList.remove('hidden');
+        document.getElementById('content').classList.remove('hidden');
       } else {
         alert('Captcha tidak sesuai. Silakan coba lagi.');
         generateCaptcha();
       }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
       generateCaptcha();
-      document.getElementById('captchaModal').classList.remove('hidden');
+      renderFavorites();
     });
-
-    document.getElementById('themeToggle').addEventListener('click', function() {
-      isDarkTheme = !isDarkTheme;
-      document.documentElement.classList.toggle('theme-dark', isDarkTheme);
-      document.getElementById('themeIcon').classList.toggle('fa-moon', !isDarkTheme);
-      document.getElementById('themeIcon').classList.toggle('fa-sun', isDarkTheme);
-    });
-
-    document.getElementById('chatToggle').addEventListener('click', function() {
-      document.getElementById('chatModal').classList.remove('hidden');
-    });
-
-    function closeChat() {
-      document.getElementById('chatModal').classList.add('hidden');
-    }
 
     function search() {
       const query = document.getElementById('searchInput').value;
       if (!query) {
-        Swal.fire('Error', 'Please enter a search query.', 'error');
+        Swal.fire('Error', 'Please enter a search query', 'error');
         return;
       }
       document.getElementById('loader').classList.remove('hidden');
-      axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track`, {
+      axios.get(`https://spotify23.p.rapidapi.com/search/?q=${query}&type=tracks`, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`
+          'X-RapidAPI-Host': 'spotify23.p.rapidapi.com',
+          'X-RapidAPI-Key': 'YOUR_RAPIDAPI_KEY'
         }
       })
-      .then(response => {
-        document.getElementById('loader').classList.add('hidden');
-        displayResults(response.data.tracks.items);
-      })
-      .catch(error => {
-        document.getElementById('loader').classList.add('hidden');
-        Swal.fire('Error', 'Failed to fetch data from Spotify API.', 'error');
-      });
+        .then(response => {
+          document.getElementById('loader').classList.add('hidden');
+          const results = response.data.tracks.items;
+          renderResults(results);
+        })
+        .catch(error => {
+          document.getElementById('loader').classList.add('hidden');
+          console.error(error);
+          Swal.fire('Error', 'An error occurred while searching', 'error');
+        });
     }
 
-    function displayResults(results) {
+    function renderResults(results) {
       const resultsContainer = document.getElementById('results');
       resultsContainer.innerHTML = '';
-      results.forEach(track => {
-        const card = document.createElement('div');
-        card.className = 'p-4 bg-white rounded shadow-md mb-4 dark:bg-gray-800';
-        card.innerHTML = `
-          <div class="flex items-center">
-            <img src="${track.album.images[0].url}" alt="Album Cover" class="w-16 h-16 rounded mr-4">
+      results.forEach(item => {
+        const resultDiv = document.createElement('div');
+        resultDiv.className = 'border border-gray-300 p-4 rounded-lg mb-4 bg-white dark:bg-gray-700';
+        resultDiv.innerHTML = `
+          <div class="flex items-center space-x-4">
+            <img src="${item.album.images[0].url}" alt="Album Art" class="w-16 h-16">
             <div>
-              <h3 class="text-lg font-bold">${track.name}</h3>
-              <p class="text-gray-600 dark:text-gray-400">${track.artists[0].name}</p>
+              <h3 class="text-lg font-bold">${item.name}</h3>
+              <p class="text-gray-600 dark:text-gray-400">${item.artists[0].name}</p>
+              <p class="text-gray-600 dark:text-gray-400">${item.album.name}</p>
             </div>
-            <button onclick="showPreview(${track.id})" class="ml-auto bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300"><i class="fas fa-play"></i></button>
+            <button onclick="previewSong('${item.preview_url}', '${item.album.images[0].url}', '${item.name}', '${item.artists[0].name}', '${item.album.name}')" class="ml-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
+              <i class="fas fa-play"></i>
+            </button>
           </div>
         `;
-        resultsContainer.appendChild(card);
+        resultsContainer.appendChild(resultDiv);
       });
     }
 
-    function showPreview(trackId) {
-      axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        }
-      })
-      .then(response => {
-        const track = response.data;
-        currentSong = track;
-        document.getElementById('previewThumbnail').src = track.album.images[0].url;
-        document.getElementById('previewTitle').textContent = track.name;
-        document.getElementById('previewArtist').textContent = track.artists[0].name;
-        document.getElementById('previewAlbum').textContent = track.album.name;
-        document.getElementById('previewDownload').href = track.preview_url;
-        document.getElementById('previewAudioContainer').innerHTML = `<audio controls src="${track.preview_url}" class="w-full"></audio>`;
-        document.getElementById('previewModal').classList.remove('hidden');
-      })
-      .catch(error => {
-        Swal.fire('Error', 'Failed to fetch track details from Spotify API.', 'error');
-      });
+    function previewSong(url, thumbnail, title, artist, album) {
+      if (!url) {
+        Swal.fire('Error', 'No preview available for this track', 'error');
+        return;
+      }
+      currentSong = { url, thumbnail, title, artist, album };
+      document.getElementById('previewThumbnail').src = thumbnail;
+      document.getElementById('previewTitle').textContent = title;
+      document.getElementById('previewArtist').textContent = artist;
+      document.getElementById('previewAlbum').textContent = album;
+
+      const audioContainer = document.getElementById('previewAudioContainer');
+      audioContainer.innerHTML = `
+        <audio controls class="w-full mt-4">
+          <source src="${url}" type="audio/mpeg">
+          Your browser does not support the audio element.
+        </audio>
+      `;
+
+      document.getElementById('previewModal').classList.remove('hidden');
     }
 
     function closePreview() {
       document.getElementById('previewModal').classList.add('hidden');
+      currentSong = null;
     }
 
     function saveToFavorites() {
-      if (currentSong && !favoriteSongs.some(song => song.id === currentSong.id)) {
+      if (currentSong && !favoriteSongs.some(song => song.url === currentSong.url)) {
         favoriteSongs.push(currentSong);
         localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-        Swal.fire('Success', 'Song added to favorites.', 'success');
+        Swal.fire('Success', 'Song added to favorites', 'success');
+        closePreview();
+        renderFavorites();
       } else {
-        Swal.fire('Error', 'Song is already in favorites.', 'error');
+        Swal.fire('Info', 'Song is already in favorites', 'info');
       }
     }
 
     function renderFavorites() {
       const favoritesContainer = document.getElementById('favorites');
       favoritesContainer.innerHTML = '';
-      favoriteSongs.forEach(song => {
-        const card = document.createElement('div');
-        card.className = 'p-4 bg-white rounded shadow-md mb-4 dark:bg-gray-800';
-        card.innerHTML = `
-          <div class="flex items-center">
-            <img src="${song.album.images[0].url}" alt="Album Cover" class="w-16 h-16 rounded mr-4">
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedSongs = favoriteSongs.slice(startIndex, endIndex);
+
+      paginatedSongs.forEach(song => {
+        const favoriteDiv = document.createElement('div');
+        favoriteDiv.className = 'border border-gray-300 p-4 rounded-lg mb-4 bg-white dark:bg-gray-700';
+        favoriteDiv.innerHTML = `
+          <div class="flex items-center space-x-4">
+            <img src="${song.thumbnail}" alt="Album Art" class="w-16 h-16">
             <div>
-              <h3 class="text-lg font-bold">${song.name}</h3>
-              <p class="text-gray-600 dark:text-gray-400">${song.artists[0].name}</p>
+              <h3 class="text-lg font-bold">${song.title}</h3>
+              <p class="text-gray-600 dark:text-gray-400">${song.artist}</p>
+              <p class="text-gray-600 dark:text-gray-400">${song.album}</p>
             </div>
-            <button onclick="showPreview(${song.id})" class="ml-auto bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300"><i class="fas fa-play"></i></button>
+            <audio controls class="ml-auto">
+              <source src="${song.url}" type="audio/mpeg">
+              Your browser does not support the audio element.
+            </audio>
           </div>
         `;
-        favoritesContainer.appendChild(card);
+        favoritesContainer.appendChild(favoriteDiv);
       });
+
+      renderPagination();
     }
 
-    document.getElementById('sendButton').addEventListener('click', function() {
-      const message = document.getElementById('chatInput').value;
-      if (!message) return;
-      addChatMessage('user', message);
-      axios.post('https://api.example.com/chat', { message })
-      .then(response => {
-        addChatMessage('bot', response.data.reply);
-      })
-      .catch(error => {
-        addChatMessage('bot', 'Error: Could not process your message.');
-      });
-    });
+    function renderPagination() {
+      const paginationContainer = document.getElementById('pagination');
+      paginationContainer.innerHTML = '';
 
-    document.getElementById('clearButton').addEventListener('click', function() {
-      document.getElementById('chatContainer').innerHTML = '';
-    });
+      const totalPages = Math.ceil(favoriteSongs.length / itemsPerPage);
 
-    function addChatMessage(sender, message) {
-      const chatContainer = document.getElementById('chatContainer');
-      const messageElement = document.createElement('div');
-      messageElement.className = `p-2 mb-2 rounded ${sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`;
-      messageElement.textContent = message;
-      chatContainer.appendChild(messageElement);
-      chatContainer.scrollTop = chatContainer.scrollHeight;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-      if (localStorage.getItem('theme') === 'dark') {
-        isDarkTheme = true;
-        document.documentElement.classList.add('theme-dark');
-        document.getElementById('themeIcon').classList.remove('fa-moon');
-        document.getElementById('themeIcon').classList.add('fa-sun');
+      for (let i = 1; i <= totalPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.className = `px-4 py-2 border border-gray-300 rounded ${i === currentPage ? 'bg-blue-500 text-white' : 'bg-white text-gray-700 dark:bg-gray-700 dark:text-white'}`;
+        pageButton.onclick = () => goToPage(i);
+        paginationContainer.appendChild(pageButton);
       }
+    }
+
+    function goToPage(pageNumber) {
+      currentPage = pageNumber;
       renderFavorites();
+    }
+
+    function toggleTheme() {
+      isDarkTheme = !isDarkTheme;
+      document.body.classList.toggle('theme-dark', isDarkTheme);
+      const themeIcon = document.getElementById('themeIcon');
+      themeIcon.classList.toggle('fa-moon', !isDarkTheme);
+      themeIcon.classList.toggle('fa-sun', isDarkTheme);
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+    function toggleChat() {
+      document.getElementById('chatModal').classList.toggle('hidden');
+    }
+
+    function closeChat() {
+      document.getElementById('chatModal').classList.add('hidden');
+    }
+
+    document.getElementById('chatToggle').addEventListener('click', toggleChat);
+
+    function sendMessage() {
+      const chatInput = document.getElementById('chatInput');
+      const message = chatInput.value.trim();
+      if (!message) {
+        return;
+      }
+      const chatContainer = document.getElementById('chatContainer');
+      const userMessageDiv = document.createElement('div');
+      userMessageDiv.className = 'p-2 bg-blue-100 rounded-lg mb-2 self-end';
+      userMessageDiv.textContent = message;
+      chatContainer.appendChild(userMessageDiv);
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+
+      chatInput.value = '';
+
+      axios.post('https://api.dannteam.ai/chat', { message })
+        .then(response => {
+          const botMessageDiv = document.createElement('div');
+          botMessageDiv.className = 'p-2 bg-gray-200 rounded-lg mb-2 self-start';
+          botMessageDiv.textContent = response.data.message;
+          chatContainer.appendChild(botMessageDiv);
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        })
+        .catch(error => {
+          console.error(error);
+          const errorMessageDiv = document.createElement('div');
+          errorMessageDiv.className = 'p-2 bg-red-100 rounded-lg mb-2 self-start';
+          errorMessageDiv.textContent = 'An error occurred while sending the message.';
+          chatContainer.appendChild(errorMessageDiv);
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        });
+    }
+
+    document.getElementById('sendButton').addEventListener('click', sendMessage);
+    document.getElementById('chatInput').addEventListener('keypress', event => {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    });
+
+    document.getElementById('clearButton').addEventListener('click', () => {
+      document.getElementById('chatContainer').innerHTML = '';
     });
   </script>
 </body>
