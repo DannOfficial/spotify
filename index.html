@@ -32,7 +32,19 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gray-200">
+<body class="bg-gray-200">  
+  <!-- CAPTCHA Modal -->
+  <div id="captchaModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 flex items-center justify-center">
+    <div class="bg-white p-8 rounded-lg relative w-full max-w-sm dark:bg-gray-700">
+        <h3 class="text-lg font-bold mb-4">Verifikasi CAPTCHA</h3>
+        <div class="flex items-center justify-center mb-4">
+            <canvas id="captchaCanvas" width="200" height="50" class="border"></canvas>
+            <button onclick="generateCaptcha()" class="ml-4 text-blue-500 hover:underline">Refresh</button>
+        </div>
+        <input type="text" id="captchaInput" placeholder="Masukkan CAPTCHA" class="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect mb-4">
+        <button onclick="validateCaptcha()" class="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">Submit</button>
+      </div>
+    </div>
     <div class="container mx-auto py-10">
         <div class="p-8">
             <div class="flex justify-between items-center mb-6">
