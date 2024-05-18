@@ -173,7 +173,7 @@
 
         addChatMessage(chatInput, 'user');
 
-        axios.post(`https://chataigpt.org/wp-admin/admin-ajax.php`, {
+        axios.post(`https://chatgpt4online.org/wp-json/mwai-ui/v1/chats/submit`, {
           payload: {
             botId: "chatbot-qm966k",
     customId: null,
@@ -195,11 +195,11 @@
           },
           headers: {
             'Content-Type': 'application/json',
-            'Accept': '*/*'
+            "X-WP-Nonce": "56bef00553",
           }
         })
-        .then(data => {
-          addChatMessage(data.result, 'bot');
+        .then(response => {
+          addChatMessage(response.data.reply, 'bot');
         })
         .catch(error => console.error(error));
 
