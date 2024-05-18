@@ -118,11 +118,12 @@
     <footer class="bg-gray-800 text-white py-6 mt-10">
       <div class="container mx-auto text-center">
         <p>&copy; 2024 DannTeam. All rights reserved.</p>
-        <div class="mt-4 flex justify-center space-x-4">
-          <a href="#" class="hover:text-gray-400"><i class="fab fa-facebook fa-2x"></i></a>
-          <a href="#" class="hover:text-gray-400"><i class="fab fa-twitter fa-2x"></i></a>
-          <a href="#" class="hover:text-gray-400"><i class="fab fa-instagram fa-2x"></i></a>
-          <a href="#" class="hover:text-gray-400"><i class="fab fa-linkedin fa-2x"></i></a>
+        <p>Made with <i class="fas fa-heart text-red-500"></i> by DannTeam</p>
+        <div class="flex justify-center space-x-4 mt-4">
+          <a href="#" class="hover:text-gray-400"><i class="fab fa-facebook"></i></a>
+          <a href="#" class="hover:text-gray-400"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="hover:text-gray-400"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="hover:text-gray-400"><i class="fab fa-linkedin"></i></a>
         </div>
       </div>
     </footer>
@@ -132,241 +133,320 @@
       let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
       const itemsPerPage = 5;
       let currentPage = 1;
-      let isDarkMode = localStorage.getItem('isDarkMode') === 'true';
-
-      document.addEventListener('DOMContentLoaded', function () {
-        generateCaptcha();
-        updateFavorites();
-        applyTheme();
-        if (isDarkMode) {
-          document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun');
-        }
-      });
 
       function generateCaptcha() {
-        const captchaText = (Math.random() + 1).toString(36).substring(2, 8);
-        const captchaCanvas = document.getElementById('captchaCanvas');
-        const ctx = captchaCanvas.getContext('2d');
-        ctx.clearRect(0, 0, captchaCanvas.width, captchaCanvas.height);
+        const canvas = document.getElementById('captchaCanvas');
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let captcha = '';
+        for (let i = 0; i < 6; i++) {
+          captcha += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+
         ctx.font = '30px Arial';
-        ctx.fillText(captchaText, 50, 35);
-        captchaCanvas.setAttribute('data-text', captchaText);
+        ctx.fillStyle = '#000';
+        ctx.fillText(captcha, 20, 35);
+
+        sessionStorage.setItem('captcha', captcha);
       }
 
       function validateCaptcha() {
-        const input = document.getElementById('captchaInput').value;
-        const captchaText = document.getElementById('captchaCanvas').getAttribute('data-text');
-        if (input === captchaText) {
-          document.getElementById('captchaModal').classList.add('hidden');
+        const captchaInput = document.getElementById('captchaInput').value;
+        const captcha = sessionStorage.getItem('captcha');
+
+        if (captchaInput === captcha) {
+          document.getElementById('captchaModal').style.display = 'none';
           document.getElementById('container').classList.remove('hidden');
         } else {
-          Swal.fire('Captcha salah', 'Silakan coba lagi', 'error');
+          Swal.fire('Captcha salah!', 'Silakan coba lagi.', 'error');
           generateCaptcha();
         }
       }
 
+      generateCaptcha();
+
       function search() {
-        const query = document.getElementById('searchInput').value.trim();
-        if (query === '') {
-          Swal.fire('Error', 'Please enter a search query', 'error');
-          return;
-        }
+        const query = document.getElementById('searchInput').value;
+        if (!query) return;
+
         document.getElementById('loader').classList.remove('hidden');
-        axios.get(`https://saavn.me/search/songs?query=${query}`)
+
+        axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track`)
           .then(response => {
-            const results = response.data.data.results;
+            document.getElementById('loader').classList.add('hidden');
+            const results = response.data.tracks.items;
             displayResults(results);
           })
           .catch(error => {
-            Swal.fire('Error', 'Failed to fetch search results', 'error');
-          })
-          .finally(() => {
             document.getElementById('loader').classList.add('hidden');
+            console.error(error);
           });
       }
 
       function displayResults(results) {
         const resultsContainer = document.getElementById('results');
         resultsContainer.innerHTML = '';
-        results.forEach(result => {
-          const resultElement = document.createElement('div');
-          resultElement.className = 'bg-white rounded-lg shadow-md p-4 mb-4 flex justify-between items-center dark:bg-gray-700';
-          resultElement.innerHTML = `
-            <div class="flex items-center">
-              <img src="${result.image[2].link}" alt="${result.name}" class="w-16 h-16 mr-4">
-              <div>
-                <h3 class="text-lg font-bold dark:text-white">${result.name}</h3>
-                <p class="text-gray-600 dark:text-gray-400">${result.primaryArtists}</p>
-                <p class="text-gray-600 dark:text-gray-400">${result.album.name}</p>
-              </div>
-            </div>
-            <button onclick="showPreview('${result.id}')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300">
-              <i class="fas fa-arrow-right"></i>
-            </button>
-          `;
-          resultsContainer.appendChild(resultElement);
+
+        results.forEach(song => {
+          const songElement = document.createElement('div');
+          songElement.classList.add('bg-white', 'p-4', 'rounded', 'shadow', 'mb-4', 'flex', 'items-center', 'justify-between', 'dark:bg-gray-700');
+
+          const songInfo = document.createElement('div');
+          songInfo.classList.add('flex', 'items-center');
+
+          const thumbnail = document.createElement('img');
+          thumbnail.src = song.album.images[0]?.url || 'https://via.placeholder.com/50';
+          thumbnail.alt = song.name;
+          thumbnail.classList.add('w-12', 'h-12', 'mr-4');
+
+          const info = document.createElement('div');
+
+          const title = document.createElement('h3');
+          title.textContent = song.name;
+          title.classList.add('text-lg', 'font-bold', 'dark:text-white');
+
+          const artist = document.createElement('p');
+          artist.textContent = song.artists[0].name;
+          artist.classList.add('text-gray-700', 'dark:text-gray-300');
+
+          info.appendChild(title);
+          info.appendChild(artist);
+
+          songInfo.appendChild(thumbnail);
+          songInfo.appendChild(info);
+
+          const actions = document.createElement('div');
+          actions.classList.add('flex', 'items-center');
+
+          const previewButton = document.createElement('button');
+          previewButton.innerHTML = '<i class="fas fa-play"></i>';
+          previewButton.classList.add('text-blue-500', 'hover:text-blue-600', 'focus:outline-none', 'mr-2');
+          previewButton.onclick = () => previewSong(song);
+
+          const chordButton = document.createElement('button');
+          chordButton.innerHTML = '<i class="fas fa-music"></i>';
+          chordButton.classList.add('text-green-500', 'hover:text-green-600', 'focus:outline-none', 'mr-2');
+          chordButton.onclick = () => displayChords(song);
+
+          const saveButton = document.createElement('button');
+          saveButton.innerHTML = '<i class="fas fa-heart"></i>';
+          saveButton.classList.add('text-red-500', 'hover:text-red-600', 'focus:outline-none');
+          saveButton.onclick = () => saveToFavorites(song);
+
+          actions.appendChild(previewButton);
+          actions.appendChild(chordButton);
+          actions.appendChild(saveButton);
+
+          songElement.appendChild(songInfo);
+          songElement.appendChild(actions);
+
+          resultsContainer.appendChild(songElement);
         });
-        setupPagination(results);
+
+        setupPagination(results.length);
       }
 
-      function showPreview(songId) {
-        axios.get(`https://saavn.me/songs?id=${songId}`)
-          .then(response => {
-            const song = response.data.data[0];
-            currentSong = song;
-            document.getElementById('previewThumbnail').src = song.image[2].link;
-            document.getElementById('previewTitle').textContent = song.name;
-            document.getElementById('previewArtist').textContent = song.primaryArtists;
-            document.getElementById('previewAlbum').textContent = song.album.name;
-            document.getElementById('previewDownload').href = song.downloadUrl[4].link;
-            const audioContainer = document.getElementById('previewAudioContainer');
-            audioContainer.innerHTML = '';
-            const audioElement = document.createElement('audio');
-            audioElement.controls = true;
-            const sourceElement = document.createElement('source');
-            sourceElement.src = song.downloadUrl[4].link;
-            sourceElement.type = 'audio/mpeg';
-            audioElement.appendChild(sourceElement);
-            audioContainer.appendChild(audioElement);
-            document.getElementById('previewModal').classList.remove('hidden');
-          })
-          .catch(error => {
-            Swal.fire('Error', 'Failed to fetch song details', 'error');
-          });
+      function setupPagination(totalItems) {
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = '';
+
+        const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+        for (let i = 1; i <= totalPages; i++) {
+          const pageButton = document.createElement('button');
+          pageButton.textContent = i;
+          pageButton.classList.add('px-3', 'py-1', 'mx-1', 'rounded', 'bg-blue-500', 'text-white', 'hover:bg-blue-600', 'focus:outline-none');
+          pageButton.onclick = () => changePage(i);
+
+          paginationContainer.appendChild(pageButton);
+        }
+      }
+
+      function changePage(pageNumber) {
+        currentPage = pageNumber;
+        search();
+      }
+
+      function previewSong(song) {
+        document.getElementById('previewThumbnail').src = song.album.images[0]?.url || 'https://via.placeholder.com/150';
+        document.getElementById('previewTitle').textContent = song.name;
+        document.getElementById('previewArtist').textContent = song.artists[0].name;
+        document.getElementById('previewAlbum').textContent = song.album.name;
+
+        const audioContainer = document.getElementById('previewAudioContainer');
+        audioContainer.innerHTML = '';
+        if (song.preview_url) {
+          const audio = document.createElement('audio');
+          audio.controls = true;
+          audio.src = song.preview_url;
+          audioContainer.appendChild(audio);
+        } else {
+          audioContainer.textContent = 'No preview available';
+        }
+
+        document.getElementById('previewDownload').href = song.preview_url;
+        document.getElementById('previewModal').classList.remove('hidden');
+        currentSong = song;
+      }
+
+      function displayChords(song) {
+        Swal.fire({
+          title: 'Chords for ' + song.name,
+          html: 'Chords will be displayed here for ' + song.name + ' by ' + song.artists[0].name,
+          icon: 'info',
+          confirmButtonText: 'Close'
+        });
+      }
+
+      function saveToFavorites(song = null) {
+        if (song) {
+          favoriteSongs.push(song);
+          localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+        }
+        displayFavorites();
+        closePreview();
+      }
+
+      function displayFavorites() {
+        const favoritesContainer = document.getElementById('favorites');
+        favoritesContainer.innerHTML = '';
+
+        favoriteSongs.forEach((song, index) => {
+          const songElement = document.createElement('div');
+          songElement.classList.add('bg-white', 'p-4', 'rounded', 'shadow', 'mb-4', 'flex', 'items-center', 'justify-between', 'dark:bg-gray-700');
+
+          const songInfo = document.createElement('div');
+          songInfo.classList.add('flex', 'items-center');
+
+          const thumbnail = document.createElement('img');
+          thumbnail.src = song.album.images[0]?.url || 'https://via.placeholder.com/50';
+          thumbnail.alt = song.name;
+          thumbnail.classList.add('w-12', 'h-12', 'mr-4');
+
+          const info = document.createElement('div');
+
+          const title = document.createElement('h3');
+          title.textContent = song.name;
+          title.classList.add('text-lg', 'font-bold', 'dark:text-white');
+
+          const artist = document.createElement('p');
+          artist.textContent = song.artists[0].name;
+          artist.classList.add('text-gray-700', 'dark:text-gray-300');
+
+          info.appendChild(title);
+          info.appendChild(artist);
+
+          songInfo.appendChild(thumbnail);
+          songInfo.appendChild(info);
+
+          const actions = document.createElement('div');
+          actions.classList.add('flex', 'items-center');
+
+          const deleteButton = document.createElement('button');
+          deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+          deleteButton.classList.add('text-red-500', 'hover:text-red-600', 'focus:outline-none');
+          deleteButton.onclick = () => removeFromFavorites(index);
+
+          actions.appendChild(deleteButton);
+
+          songElement.appendChild(songInfo);
+          songElement.appendChild(actions);
+
+          favoritesContainer.appendChild(songElement);
+        });
+      }
+
+      function removeFromFavorites(index) {
+        favoriteSongs.splice(index, 1);
+        localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+        displayFavorites();
       }
 
       function closePreview() {
         document.getElementById('previewModal').classList.add('hidden');
       }
 
-      function saveToFavorites() {
-        if (!favoriteSongs.some(song => song.id === currentSong.id)) {
-          favoriteSongs.push(currentSong);
-          localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-          updateFavorites();
-          Swal.fire('Success', 'Song added to favorites', 'success');
-        } else {
-          Swal.fire('Info', 'Song is already in favorites', 'info');
-        }
-        closePreview();
-      }
-
-      function updateFavorites() {
-        const favoritesContainer = document.getElementById('favorites');
-        favoritesContainer.innerHTML = '';
-        const paginatedFavorites = paginate(favoriteSongs, itemsPerPage, currentPage);
-        paginatedFavorites.forEach(favorite => {
-          const favoriteElement = document.createElement('div');
-          favoriteElement.className = 'bg-white rounded-lg shadow-md p-4 mb-4 flex justify-between items-center dark:bg-gray-700';
-          favoriteElement.innerHTML = `
-            <div class="flex items-center">
-              <img src="${favorite.image[2].link}" alt="${favorite.name}" class="w-16 h-16 mr-4">
-              <div>
-                <h3 class="text-lg font-bold dark:text-white">${favorite.name}</h3>
-                <p class="text-gray-600 dark:text-gray-400">${favorite.primaryArtists}</p>
-                <p class="text-gray-600 dark:text-gray-400">${favorite.album.name}</p>
-              </div>
-            </div>
-            <button onclick="removeFromFavorites('${favorite.id}')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300">
-              <i class="fas fa-trash"></i>
-            </button>
-          `;
-          favoritesContainer.appendChild(favoriteElement);
-        });
-        renderPagination(favoriteSongs.length);
-      }
-
-      function removeFromFavorites(songId) {
-        favoriteSongs = favoriteSongs.filter(song => song.id !== songId);
-        localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-        updateFavorites();
-        Swal.fire('Success', 'Song removed from favorites', 'success');
-      }
-
-      function setupPagination(results) {
-        const paginationContainer = document.getElementById('pagination');
-        paginationContainer.innerHTML = '';
-        const totalPages = Math.ceil(results.length / itemsPerPage);
-        for (let i = 1; i <= totalPages; i++) {
-          const pageButton = document.createElement('button');
-          pageButton.textContent = i;
-          pageButton.className = 'bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300';
-          if (i === currentPage) {
-            pageButton.classList.add('bg-blue-700');
-          }
-          pageButton.onclick = function () {
-            currentPage = i;
-            updateFavorites();
-          };
-          paginationContainer.appendChild(pageButton);
-        }
-      }
-
-      function paginate(array, pageSize, pageNumber) {
-        return array.slice((pageNumber - 1) * pageSize, pageNumber * pageSize);
-      }
-
-      function renderPagination(totalItems) {
-        const paginationContainer = document.getElementById('pagination');
-        paginationContainer.innerHTML = '';
-        const totalPages = Math.ceil(totalItems / itemsPerPage);
-        for (let i = 1; i <= totalPages; i++) {
-          const pageButton = document.createElement('button');
-          pageButton.textContent = i;
-          pageButton.className = 'bg-blue-500 text-white px-4 py-2 rounded mr-2 hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300';
-          if (i === currentPage) {
-            pageButton.classList.add('bg-blue-700');
-          }
-          pageButton.onclick = function () {
-            currentPage = i;
-            updateFavorites();
-          };
-          paginationContainer.appendChild(pageButton);
-        }
-      }
-
-      document.getElementById('themeToggle').addEventListener('click', function () {
-        isDarkMode = !isDarkMode;
-        localStorage.setItem('isDarkMode', isDarkMode);
-        applyTheme();
-      });
-
-      function applyTheme() {
-        const body = document.body;
-        if (isDarkMode) {
-          body.classList.add('theme-dark');
-          document.getElementById('themeIcon').classList.replace('fa-moon', 'fa-sun');
-        } else {
-          body.classList.remove('theme-dark');
-          document.getElementById('themeIcon').classList.replace('fa-sun', 'fa-moon');
-        }
-      }
-
-      document.getElementById('chatToggle').addEventListener('click', function () {
-        document.getElementById('chatModal').classList.remove('hidden');
-      });
-
       function closeChat() {
         document.getElementById('chatModal').classList.add('hidden');
       }
 
-      document.getElementById('chatForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        const chatInput = document.getElementById('chatInput').value;
-        if (chatInput.trim() !== '') {
-          const chatMessages = document.getElementById('chatMessages');
-          const messageElement = document.createElement('div');
-          messageElement.className = 'bg-blue-500 text-white p-2 rounded-lg mb-2';
-          messageElement.textContent = chatInput;
-          chatMessages.appendChild(messageElement);
-          document.getElementById('chatInput').value = '';
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+      function toggleTheme() {
+        const body = document.body;
+        const themeIcon = document.getElementById('themeIcon');
+
+        if (body.classList.contains('theme-dark')) {
+          body.classList.remove('theme-dark');
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+        } else {
+          body.classList.add('theme-dark');
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+        }
+      }
+
+      document.getElementById('chatButton').addEventListener('click', () => {
+        document.getElementById('chatModal').classList.remove('hidden');
+      });
+
+      document.getElementById('chatInput').addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          sendMessage();
         }
       });
 
-      document.getElementById('searchInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-          search();
+      document.getElementById('closeChat').addEventListener('click', closeChat);
+
+      function sendMessage() {
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        if (message) {
+          displayMessage('You', message);
+          chatInput.value = '';
+
+          axios.post('/api/chat', { message })
+            .then(response => {
+              const reply = response.data.reply;
+              displayMessage('Bot', reply);
+            })
+            .catch(error => {
+              console.error('Error sending message:', error);
+            });
+        }
+      }
+
+      function displayMessage(sender, message) {
+        const chatContainer = document.getElementById('chatContainer');
+        const messageElement = document.createElement('div');
+        messageElement.classList.add('mb-4', 'p-2', 'rounded', 'shadow', 'max-w-md', 'w-fit', 'flex', 'items-center');
+
+        const senderElement = document.createElement('strong');
+        senderElement.textContent = `${sender}: `;
+        senderElement.classList.add('mr-2');
+
+        const messageText = document.createElement('span');
+        messageText.textContent = message;
+
+        messageElement.appendChild(senderElement);
+        messageElement.appendChild(messageText);
+
+        if (sender === 'You') {
+          messageElement.classList.add('bg-blue-500', 'text-white', 'self-end');
+        } else {
+          messageElement.classList.add('bg-gray-200', 'self-start');
+        }
+
+        chatContainer.appendChild(messageElement);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        if (localStorage.getItem('favoriteSongs')) {
+          favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs'));
+          displayFavorites();
         }
       });
     </script>
