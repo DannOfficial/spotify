@@ -25,20 +25,6 @@
     .input-effect:focus {
       transform: scale(1.05);
     }
-    footer {
-      background-color: #1a202c;
-      color: #cbd5e0;
-      text-align: center;
-      padding: 20px 0;
-    }
-    footer a {
-      color: #cbd5e0;
-      margin: 0 10px;
-      transition: color 0.3s;
-    }
-    footer a:hover {
-      color: #63b3ed;
-    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -130,12 +116,15 @@
     </div>
 
     <!-- Footer -->
-    <footer>
-      <p>&copy; 2024 DannTeam. All Rights Reserved.</p>
-      <div>
-        <a href="#">Home</a> |
-        <a href="#">About</a> |
-        <a href="#">Contact</a>
+    <footer class="bg-gray-800 text-gray-200 py-4 mt-10">
+      <div class="container mx-auto text-center">
+        <p>© 2024 DannTeam. All rights reserved.</p>
+        <div class="mt-4 flex justify-center space-x-4">
+          <a href="#" class="hover:text-white"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="hover:text-white"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="hover:text-white"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="hover:text-white"><i class="fab fa-linkedin-in"></i></a>
+        </div>
       </div>
     </footer>
 
@@ -144,230 +133,199 @@
       let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
       const itemsPerPage = 5;
       let currentPage = 1;
-      let isDarkTheme = false;
-      let captchaCode;
-
+      let totalPages = 1;
+      
+      const modal = document.getElementById('previewModal');
+      const captchaModal = document.getElementById('captchaModal');
+      const chatModal = document.getElementById('chatModal');
+      const container = document.getElementById('container');
+      const captchaCanvas = document.getElementById('captchaCanvas');
+      const ctx = captchaCanvas.getContext('2d');
+      const captchaInput = document.getElementById('captchaInput');
+      let captchaCode = '';
+      
       function generateCaptcha() {
-        const canvas = document.getElementById('captchaCanvas');
-        const context = canvas.getContext('2d');
-        context.clearRect(0, 0, canvas.width, canvas.height);
-
-        captchaCode = '';
-        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        for (let i = 0; i < 6; i++) {
-          captchaCode += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-
-        context.font = '24px Arial';
-        context.fillStyle = '#000';
-        context.fillText(captchaCode, 50, 30);
+        captchaCode = Math.random().toString(36).substring(2, 8);
+        ctx.clearRect(0, 0, captchaCanvas.width, captchaCanvas.height);
+        ctx.font = '24px Arial';
+        ctx.fillStyle = 'black';
+        ctx.fillText(captchaCode, 50, 35);
       }
 
       function validateCaptcha() {
-        const input = document.getElementById('captchaInput').value;
-        if (input === captchaCode) {
-          document.getElementById('captchaModal').style.display = 'none';
-          document.getElementById('container').classList.remove('hidden');
+        if (captchaInput.value === captchaCode) {
+          captchaModal.classList.add('hidden');
+          container.classList.remove('hidden');
         } else {
-          Swal.fire('Error', 'Captcha salah, coba lagi.', 'error');
+          Swal.fire('Error', 'Captcha tidak cocok, coba lagi!', 'error');
+          generateCaptcha();
+          captchaInput.value = '';
         }
       }
 
       function search() {
         const query = document.getElementById('searchInput').value;
-        if (!query) {
-          Swal.fire('Error', 'Masukkan kata kunci pencarian.', 'error');
+        if (query.trim() === '') {
+          Swal.fire('Error', 'Masukkan kata kunci untuk pencarian', 'error');
           return;
         }
-
         document.getElementById('loader').classList.remove('hidden');
-
-        axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track`, {
+        axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {
           headers: {
-            Authorization: 'Bearer BQCFHZ3e1VQbxY9-njMHxtv_EXBXnSDP711S8JIceah_SujOEU5mBjrte-6qX9PKNSV7_bZWHEzlg6v39iDAX9ZYl4CsrabyslGaucH8fNHnUxr7Xoo' // Token yang diperlukan untuk akses API
+            'Authorization': 'Bearer YOUR_SPOTIFY_API_TOKEN'
           }
-        })
-        .then(response => {
+        }).then(response => {
           document.getElementById('loader').classList.add('hidden');
-          displayResults(response.data.tracks.items);
-        })
-        .catch(error => {
+          const tracks = response.data.tracks.items;
+          const resultsContainer = document.getElementById('results');
+          resultsContainer.innerHTML = '';
+          tracks.forEach(track => {
+            const trackElement = document.createElement('div');
+            trackElement.className = 'bg-white p-4 mb-4 rounded-md shadow-md dark:bg-gray-800';
+            trackElement.innerHTML = `
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="text-lg font-bold">${track.name}</h3>
+                  <p class="text-gray-700 dark:text-gray-300">${track.artists.map(artist => artist.name).join(', ')}</p>
+                  <p class="text-gray-700 dark:text-gray-300">${track.album.name}</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300" onclick="showPreview('${track.id}')">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-green-300" onclick="addToFavorites('${track.id}')">
+                    <i class="fas fa-heart"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+            resultsContainer.appendChild(trackElement);
+          });
+        }).catch(error => {
           document.getElementById('loader').classList.add('hidden');
-          Swal.fire('Error', 'Gagal mendapatkan hasil pencarian.', 'error');
+          Swal.fire('Error', 'Gagal mengambil data dari Spotify', 'error');
         });
       }
 
-      function displayResults(songs) {
-        const results = document.getElementById('results');
-        results.innerHTML = '';
-
-        if (songs.length === 0) {
-          results.innerHTML = '<p class="text-center">Tidak ada hasil.</p>';
-          return;
-        }
-
-        songs.forEach(song => {
-          const songCard = document.createElement('div');
-          songCard.className = 'p-4 bg-white shadow-md rounded-md flex items-center justify-between dark:bg-gray-700';
-
-          const songInfo = document.createElement('div');
-          songInfo.innerHTML = `
-            <h3 class="font-bold">${song.name}</h3>
-            <p class="text-gray-600">${song.artists.map(artist => artist.name).join(', ')}</p>
-            <p class="text-gray-600">${song.album.name}</p>
-          `;
-          songCard.appendChild(songInfo);
-
-          const actionButton = document.createElement('button');
-          actionButton.className = 'bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300';
-          actionButton.innerHTML = '<i class="fas fa-play"></i>';
-          actionButton.onclick = () => previewSong(song);
-          songCard.appendChild(actionButton);
-
-          results.appendChild(songCard);
+      function showPreview(trackId) {
+        axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
+          headers: {
+            'Authorization': 'Bearer YOUR_SPOTIFY_API_TOKEN'
+          }
+        }).then(response => {
+          const track = response.data;
+          document.getElementById('previewThumbnail').src = track.album.images[0].url;
+          document.getElementById('previewTitle').innerText = track.name;
+          document.getElementById('previewArtist').innerText = track.artists.map(artist => artist.name).join(', ');
+          document.getElementById('previewAlbum').innerText = track.album.name;
+          document.getElementById('previewDownload').href = track.preview_url;
+          modal.classList.remove('hidden');
+        }).catch(error => {
+          Swal.fire('Error', 'Gagal mengambil data dari Spotify', 'error');
         });
-      }
-
-      function previewSong(song) {
-        currentSong = song;
-        document.getElementById('previewThumbnail').src = song.album.images[0].url;
-        document.getElementById('previewTitle').innerText = song.name;
-        document.getElementById('previewArtist').innerText = song.artists.map(artist => artist.name).join(', ');
-        document.getElementById('previewAlbum').innerText = song.album.name;
-        document.getElementById('previewDownload').href = song.preview_url;
-
-        const audioContainer = document.getElementById('previewAudioContainer');
-        audioContainer.innerHTML = '';
-        const audioElement = document.createElement('audio');
-        audioElement.controls = true;
-        audioElement.src = song.preview_url;
-        audioContainer.appendChild(audioElement);
-
-        document.getElementById('previewModal').classList.remove('hidden');
       }
 
       function closePreview() {
-        document.getElementById('previewModal').classList.add('hidden');
+        modal.classList.add('hidden');
       }
 
-      function saveToFavorites() {
-        if (!currentSong) return;
+      function addToFavorites(trackId) {
+        if (!favoriteSongs.includes(trackId)) {
+          favoriteSongs.push(trackId);
+          localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
+          loadFavorites();
+        }
+      }
 
-        favoriteSongs.push(currentSong);
+      function loadFavorites() {
+        const favoritesContainer = document.getElementById('favorites');
+        favoritesContainer.innerHTML = '';
+        favoriteSongs.forEach(trackId => {
+          axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
+            headers: {
+              'Authorization': 'Bearer YOUR_SPOTIFY_API_TOKEN'
+            }
+          }).then(response => {
+            const track = response.data;
+            const trackElement = document.createElement('div');
+            trackElement.className = 'bg-white p-4 mb-4 rounded-md shadow-md dark:bg-gray-800';
+            trackElement.innerHTML = `
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="text-lg font-bold">${track.name}</h3>
+                  <p class="text-gray-700 dark:text-gray-300">${track.artists.map(artist => artist.name).join(', ')}</p>
+                  <p class="text-gray-700 dark:text-gray-300">${track.album.name}</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300" onclick="showPreview('${track.id}')">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300" onclick="removeFromFavorites('${track.id}')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+            favoritesContainer.appendChild(trackElement);
+          }).catch(error => {
+            Swal.fire('Error', 'Gagal mengambil data dari Spotify', 'error');
+          });
+        });
+      }
+
+      function removeFromFavorites(trackId) {
+        favoriteSongs = favoriteSongs.filter(id => id !== trackId);
         localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-        Swal.fire('Berhasil', 'Lagu ditambahkan ke favorit.', 'success');
-        displayFavorites();
-        closePreview();
+        loadFavorites();
       }
 
-      function displayFavorites() {
-        const favorites = document.getElementById('favorites');
-        favorites.innerHTML = '';
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        document.documentElement.classList.toggle('theme-dark');
+        const themeIcon = document.getElementById('themeIcon');
+        if (document.documentElement.classList.contains('theme-dark')) {
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+        } else {
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+        }
+      });
 
-        if (favoriteSongs.length === 0) {
-          favorites.innerHTML = '<p class="text-center">Tidak ada lagu favorit.</p>';
+      document.getElementById('chatToggle').addEventListener('click', () => {
+        chatModal.classList.toggle('hidden');
+      });
+
+      document.getElementById('sendButton').addEventListener('click', sendMessage);
+      document.getElementById('clearButton').addEventListener('click', clearChat);
+
+      function sendMessage() {
+        const chatInput = document.getElementById('chatInput');
+        const message = chatInput.value.trim();
+        if (message === '') {
+          Swal.fire('Error', 'Ketik pesan sebelum mengirim', 'error');
           return;
         }
-
-        const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        const paginatedFavorites = favoriteSongs.slice(start, end);
-
-        paginatedFavorites.forEach(song => {
-          const songCard = document.createElement('div');
-          songCard.className = 'p-4 bg-white shadow-md rounded-md flex items-center justify-between dark:bg-gray-700';
-
-          const songInfo = document.createElement('div');
-          songInfo.innerHTML = `
-            <h3 class="font-bold">${song.name}</h3>
-            <p class="text-gray-600">${song.artists.map(artist => artist.name).join(', ')}</p>
-            <p class="text-gray-600">${song.album.name}</p>
-          `;
-          songCard.appendChild(songInfo);
-
-          const actionButton = document.createElement('button');
-          actionButton.className = 'bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 focus:outline-none focus:ring focus:border-red-300';
-          actionButton.innerHTML = '<i class="fas fa-trash"></i>';
-          actionButton.onclick = () => removeFromFavorites(song);
-          songCard.appendChild(actionButton);
-
-          favorites.appendChild(songCard);
-        });
-
-        updatePagination();
+        const chatContainer = document.getElementById('chatContainer');
+        const messageElement = document.createElement('div');
+        messageElement.className = 'bg-gray-100 p-2 rounded mb-2 dark:bg-gray-600';
+        messageElement.innerText = message;
+        chatContainer.appendChild(messageElement);
+        chatInput.value = '';
       }
 
-      function removeFromFavorites(song) {
-        favoriteSongs = favoriteSongs.filter(fav => fav.id !== song.id);
-        localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
-        displayFavorites();
-      }
-
-      function updatePagination() {
-        const pagination = document.getElementById('pagination');
-        pagination.innerHTML = '';
-
-        const totalPages = Math.ceil(favoriteSongs.length / itemsPerPage);
-
-        for (let i = 1; i <= totalPages; i++) {
-          const pageButton = document.createElement('button');
-          pageButton.innerText = i;
-          pageButton.className = `px-4 py-2 mx-1 rounded ${i === currentPage ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} focus:outline-none`;
-          pageButton.onclick = () => {
-            currentPage = i;
-            displayFavorites();
-          };
-          pagination.appendChild(pageButton);
-        }
-      }
-
-      function toggleTheme() {
-        isDarkTheme = !isDarkTheme;
-        document.body.classList.toggle('theme-dark');
-        document.getElementById('themeIcon').classList.toggle('fa-moon');
-        document.getElementById('themeIcon').classList.toggle('fa-sun');
-      }
-
-      function toggleChat() {
-        document.getElementById('chatModal').classList.toggle('hidden');
+      function clearChat() {
+        const chatContainer = document.getElementById('chatContainer');
+        chatContainer.innerHTML = '';
       }
 
       function closeChat() {
-        document.getElementById('chatModal').classList.add('hidden');
+        chatModal.classList.add('hidden');
       }
 
-      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
-      document.getElementById('chatToggle').addEventListener('click', toggleChat);
-      document.getElementById('sendButton').addEventListener('click', () => {
-        const chatInput = document.getElementById('chatInput');
-        const message = chatInput.value;
-        if (message.trim()) {
-          sendMessage(message);
-          chatInput.value = '';
-        }
+      window.addEventListener('DOMContentLoaded', () => {
+        generateCaptcha();
+        loadFavorites();
       });
-      document.getElementById('clearButton').addEventListener('click', () => {
-        document.getElementById('chatContainer').innerHTML = '';
-      });
-
-      function sendMessage(message) {
-        const chatContainer = document.getElementById('chatContainer');
-        const messageElement = document.createElement('div');
-        messageElement.className = 'p-2 mb-2 bg-gray-300 rounded-md self-end dark:bg-gray-800';
-        messageElement.innerText = message;
-        chatContainer.appendChild(messageElement);
-
-        setTimeout(() => {
-          const replyElement = document.createElement('div');
-          replyElement.className = 'p-2 mb-2 bg-gray-200 rounded-md self-start dark:bg-gray-900';
-          replyElement.innerText = 'Balasan otomatis dari AI: ' + message;
-          chatContainer.appendChild(replyElement);
-          chatContainer.scrollTop = chatContainer.scrollHeight;
-        }, 1000);
-      }
-
-      generateCaptcha();
-      displayFavorites();
     </script>
   </div>
 </body>
