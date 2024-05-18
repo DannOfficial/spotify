@@ -173,8 +173,25 @@
 
         addChatMessage(chatInput, 'user');
 
-        axios.get(`https://chataigpt.org/wp-admin/admin-ajax.php`, {
+        axios.post(`https://chataigpt.org/wp-admin/admin-ajax.php`, {
           payload: {
+            botId: "chatbot-qm966k",
+    customId: null,
+    session: "N/A",
+    chatId: "67uzmr9e1sv",
+    contextId: 5410,
+    messages: [
+      {
+        id: "6myn3fhk0vk",
+        role: "assistant",
+        content: "Hi! How can I help you?",
+        who: "AI: ",
+        timestamp: 1715992993960,
+      },
+    ],
+    newMessage: prompt,
+    newFileId: null,
+    stream: false,
           },
           headers: {
             'Content-Type': 'application/json',
