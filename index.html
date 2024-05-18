@@ -172,7 +172,7 @@
         document.getElementById('loader').classList.remove('hidden');
         axios.get(`https://api.spotify.com/v1/search?q=${query}&type=track&limit=10`, {
           headers: {
-            'Authorization': 'Bearer YOUR_SPOTIFY_API_TOKEN'
+            'Authorization': 'Bearer BQCFHZ3e1VQbxY9-njMHxtv_EXBXnSDP711S8JIceah_SujOEU5mBjrte-6qX9PKNSV7_bZWHEzlg6v39iDAX9ZYl4CsrabyslGaucH8fNHnUxr7Xoo'
           }
         }).then(response => {
           document.getElementById('loader').classList.add('hidden');
@@ -210,7 +210,7 @@
       function showPreview(trackId) {
         axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
           headers: {
-            'Authorization': 'Bearer YOUR_SPOTIFY_API_TOKEN'
+            'Authorization': 'Bearer BQCFHZ3e1VQbxY9-njMHxtv_EXBXnSDP711S8JIceah_SujOEU5mBjrte-6qX9PKNSV7_bZWHEzlg6v39iDAX9ZYl4CsrabyslGaucH8fNHnUxr7Xoo'
           }
         }).then(response => {
           const track = response.data;
@@ -243,7 +243,7 @@
         favoriteSongs.forEach(trackId => {
           axios.get(`https://api.spotify.com/v1/tracks/${trackId}`, {
             headers: {
-              'Authorization': 'Bearer YOUR_SPOTIFY_API_TOKEN'
+              'Authorization': 'Bearer BQCFHZ3e1VQbxY9-njMHxtv_EXBXnSDP711S8JIceah_SujOEU5mBjrte-6qX9PKNSV7_bZWHEzlg6v39iDAX9ZYl4CsrabyslGaucH8fNHnUxr7Xoo'
             }
           }).then(response => {
             const track = response.data;
