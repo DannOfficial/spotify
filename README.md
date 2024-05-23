@@ -10,6 +10,22 @@ Spotify Github repository that provides functionalities related to searching, do
 
 3. **Preview**: Users can preview songs before adding them to their library or playlist. This feature helps users decide whether they want to listen to a particular song or not, saving them time and effort.
 
+## Nodejs
+```
+    const express = require("express")
+    const app = express()
+
+    const PORT = process.env.PORT || 8000
+
+    app.get("/", (req, res) => {
+       res.sendFile(__dirname + "/index.html")
+    })
+
+    app.listen(PORT, () => {
+       console.log(`Server is running on port ${PORT}`)
+    })
+```
+
 ### Installation
 
 To use this Spotify search, download, and preview functionality, follow these steps:
@@ -44,4 +60,4 @@ Contributions to this project are welcome. If you encounter any issues or have s
 
 ### License
 
-This project is licensed under the [GNU Public License](https://opensource.org/licenses/gpl-2-0). Feel free to use, modify, and distribute the code as per the terms of the license.
+This project is licensed under the [General Public License](https://opensource.org/licenses/gpl-2-0). Feel free to use, modify, and distribute the code as per the terms of the license.
