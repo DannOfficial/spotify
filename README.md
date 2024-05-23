@@ -44,4 +44,4 @@ Contributions to this project are welcome. If you encounter any issues or have s
 
 ### License
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). Feel free to use, modify, and distribute the code as per the terms of the license.
+This project is licensed under the [GNU Public License](https://opensource.org/licenses/gpl-2-0). Feel free to use, modify, and distribute the code as per the terms of the license.
