@@ -302,6 +302,7 @@
         Your browser does not support the audio element.
         </audio>
         `;
+        document.title = `${song.title} - ${song.artist} • DannTeam`;
 
         document.getElementById('previewDownload').href = `https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`;
       }
