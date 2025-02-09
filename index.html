@@ -365,35 +365,6 @@
 
           chatMessages(chatInput, "user")
 
-          axios.post(https://chatgpt4online.org/wp-json/mwai-ui/v1/chats/submit, {
-            payload: {
-              botId: "chatbot-qm966k",
-              customId: null,
-              session: "N/A",
-              chatId: "67uzmr9e1sv",
-              contextId: 5410,
-              messages: [{
-                id: "6myn3fhk0vk",
-                role: "assistant",
-                content: "Hi! How can I help you?",
-                who: "AI: ",
-                timestamp: 1715992993960,
-              },
-              ],
-              newMessage: prompt,
-              newFileId: null,
-              stream: false,
-            },
-            headers: {
-              'Content-Type': 'application/json',
-              "X-WP-Nonce": "56bef00553",
-            }
-          })
-          .then(response => {
-            chatMessages(response.data.reply, "bot")
-          })
-          .catch(error => console.error(error))
-
           document.getElementById("chatInput").value = ""
         }
 
