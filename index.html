@@ -1,3 +1,6 @@
+<!-- DannTeam || Spotify -->
+<!-- www.spotify.dannteam.com -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,147 +27,6 @@
     }
     .input-effect:focus {
       transform: scale(1.05);
-    }
-    .audio-player {
-      background: #fff;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-      padding: 2rem;
-      max-width: 500px;
-      margin: 2rem auto;
-    }
-
-    .track-info {
-      display: flex;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .track-image {
-      width: 80px;
-      height: 80px;
-      border-radius: 10px;
-      margin-right: 1rem;
-      object-fit: cover;
-    }
-
-    .progress-bar {
-      height: 6px;
-      background-color: #e9ecef;
-      border-radius: 3px;
-      position: relative;
-      cursor: pointer;
-      margin: 1rem 0;
-    }
-
-    .progress {
-      height: 100%;
-      background-color: #0d6efd;
-      border-radius: 3px;
-      width: 45%;
-      transition: width 0.1s linear;
-    }
-
-    .progress-handle {
-      width: 16px;
-      height: 16px;
-      background-color: #0d6efd;
-      border-radius: 50%;
-      position: absolute;
-      top: 50%;
-      left: 45%;
-      transform: translate(-50%, -50%);
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-
-    .progress-handle:hover {
-      transform: translate(-50%, -50%) scale(1.2);
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-top: 1.5rem;
-    }
-
-    .control-button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #6c757d;
-      transition: all 0.2s ease;
-    }
-
-    .control-button:hover {
-      color: #0d6efd;
-    }
-
-    .play-button {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background-color: #0d6efd;
-      color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-    }
-
-    .play-button:hover {
-      transform: scale(1.1);
-      background-color: #0b5ed7;
-    }
-
-    .volume-control {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .volume-slider {
-      width: 80px;
-      height: 4px;
-      background-color: #e9ecef;
-      border-radius: 2px;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .volume-level {
-      height: 100%;
-      background-color: #0d6efd;
-      border-radius: 2px;
-      width: 70%;
-    }
-
-    .time-info {
-      color: #6c757d;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-
-    .marquee {
-      white-space: nowrap;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .marquee span {
-      display: inline-block;
-      animation: marquee 15s linear infinite;
-    }
-
-    @keyframes marquee {
-      0% {
-        transform: translateX(0);
-      }
-
-      100% {
-        transform: translateX(-100%);
-      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -215,58 +77,35 @@
       </div>
     </div>
 
+    <!-- Preview Modal -->
     <div id="previewModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
-      <div class="audio-player">
-        <div class="track-info">
-          <img id="previewThumbnail" src="" class="track-image">
-          <div>
-            <div class="marquee">
-              <span id="previewTitle" class="h5 mb-1"></span>
-            </div>
-            <p id="previewArtist" class="text-muted mb-0"></p>
-          </div>
-        </div>
-
-        <div class="progress-bar">
-          <div class="progress"></div>
-          <div class="progress-handle"></div>
-        </div>
-
-        <div class="d-flex justify-content-between time-info">
-          <span>2:45</span>
-          <span>4:30</span>
-        </div>
-
-        <div class="controls">
-          <button class="control-button">
-            <i class="fas fa-random fa-lg"></i>
+      <div class="container mx-auto h-full flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
+          <img id="previewThumbnail" src="" alt="Thumbnail" class="w-32 h-32 mb-4">
+          <h3 id="previewTitle" class="text-lg font-bold mb-2"></h3>
+          <p id="previewArtist" class="text-gray-700 mb-2"></p>
+          <p id="previewAlbum" class="text-gray-700 mb-4"></p>
+          <div id="previewAudioContainer"></div>
+          <a id="previewDownload" href="" download class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300 mr-2">
+            <i class="fas fa-download"></i>
+          </a>
+          <button onclick="saveToFavorites()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 focus:outline-none focus:ring focus:border-blue-300">
+            <i class="fas fa-save"></i>
           </button>
-          <button class="control-button">
-            <i class="fas fa-step-backward fa-lg"></i>
+          <button onclick="closePreview()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-700 px-2 py-2 rounded-full focus:outline-none focus:ring focus:border-blue-300">
+            <i class="fas fa-times"></i>
           </button>
-          <button class="play-button">
-            <i class="fas fa-play fa-lg"></i>
-          </button>
-          <button class="control-button">
-            <i class="fas fa-step-forward fa-lg"></i>
-          </button>
-          <div class="volume-control">
-            <button class="control-button">
-              <i class="fas fa-volume-up"></i>
-            </button>
-            <div class="volume-slider">
-              <div class="volume-level"></div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
 
+    <!-- Chat Modal -->
     <div id="chatModal" class="fixed top-0 left-0 w-full h-full bg-gray-800 bg-opacity-50 hidden">
       <div class="container mx-auto h-full flex items-center justify-center">
         <div class="bg-white p-8 rounded-lg relative w-full max-w-lg dark:bg-gray-700">
           <h3 class="text-lg font-bold mb-4">DannTeam AI - Chat</h3>
-          <div id="chatContainer" class="mb-4 max-h-96 overflow-y-auto"></div>
+          <div id="chatContainer" class="mb-4 max-h-96 overflow-y-auto">
+          </div>
           <div class="flex items-center space-x-2">
             <input type="text" id="chatInput" placeholder="Ketik..." class="flex-1 border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring focus:border-blue-300 dark:bg-gray-700 dark:text-white input-effect">
             <button id="sendButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring focus:border-blue-300"><i class="fas fa-paper-plane"></i></button>
@@ -280,71 +119,99 @@
     </div>
 
     <script>
-      let lagu = null;
-      let favoriteSongs = JSON.parse(localStorage.getItem("favoriteSongs")) || [];
-      let laman = 5;
-      let halamann = 1;
-      let darkTheme = false;
+      let currentSong = null;
+      let favoriteSongs = JSON.parse(localStorage.getItem('favoriteSongs')) || [];
+      const itemsPerPage = 5;
+      let currentPage = 1;
+      let isDarkTheme = false;
       let captchaCode;
 
       function generateCaptcha() {
-        const canvas = document.getElementById("captchaCanvas");
-        const context = canvas.getContext("2d");
+        const canvas = document.getElementById('captchaCanvas');
+        const context = canvas.getContext('2d');
         context.clearRect(0, 0, canvas.width, canvas.height);
 
         captchaCode = Math.random().toString(36).substring(2, 8);
-        context.font = "30px Arial";
-        context.fillStyle = "#000";
+        context.font = '30px Arial';
+        context.fillStyle = '#000';
         context.fillText(captchaCode, 50, 35);
       }
 
       function validateCaptcha() {
-        const userInput = document.getElementById("captchaInput").value;
+        const userInput = document.getElementById('captchaInput').value;
         if (userInput === captchaCode) {
-          document.getElementById("captchaModal").classList.add("hidden");
-          document.getElementById("container").classList.remove("hidden");
+          document.getElementById('captchaModal').classList.add('hidden');
+          document.getElementById('container').classList.remove('hidden');
         } else {
-          alert("Captcha tidak sesuai. Silakan coba lagi.");
-          document.getElementById("captchaInput").value = "";
+          alert('Captcha tidak sesuai. Silakan coba lagi.');
           generateCaptcha();
         }
       }
 
-      document.addEventListener("DOMContentLoaded", function() {
+      document.addEventListener('DOMContentLoaded', function() {
         generateCaptcha();
-        document.getElementById("captchaModal").classList.remove("hidden");
+        document.getElementById('captchaModal').classList.remove('hidden');
       });
 
-      document.getElementById("themeToggle").addEventListener("click", () => {
-        darkTheme = !darkTheme;
-        document.body.classList.toggle("theme-dark", darkTheme);
-        document.getElementById("themeIcon").classList.toggle("fa-moon", !darkTheme);
-        document.getElementById("themeIcon").classList.toggle("fa-sun", darkTheme);
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        isDarkTheme = !isDarkTheme;
+        document.body.classList.toggle('theme-dark', isDarkTheme);
+        document.getElementById('themeIcon').classList.toggle('fa-moon', !isDarkTheme);
+        document.getElementById('themeIcon').classList.toggle('fa-sun', isDarkTheme);
       });
 
-      document.getElementById("chatToggle").addEventListener("click", () => {
-        document.getElementById("chatModal").classList.remove("hidden");
+      document.getElementById('chatToggle').addEventListener('click', () => {
+        document.getElementById('chatModal').classList.remove('hidden');
       });
 
-      document.getElementById("sendButton").addEventListener("click", sendMessage);
-      document.getElementById("clearButton").addEventListener("click", clearChat);
+      document.getElementById('sendButton').addEventListener('click', sendMessage);
+      document.getElementById('clearButton').addEventListener('click', clearChat);
 
       function sendMessage() {
-        const chatInput = document.getElementById("chatInput").value;
+        const chatInput = document.getElementById('chatInput').value;
         if (!chatInput) return;
 
-        chatMessages(chatInput, "user");
+        addChatMessage(chatInput, 'user');
 
-        document.getElementById("chatInput").value = "";
+        axios.post(`https://chatgpt4online.org/wp-json/mwai-ui/v1/chats/submit`, {
+          payload: {
+            botId: "chatbot-qm966k",
+            customId: null,
+            session: "N/A",
+            chatId: "67uzmr9e1sv",
+            contextId: 5410,
+            messages: [{
+              id: "6myn3fhk0vk",
+              role: "assistant",
+              content: "Hi! How can I help you?",
+              who: "AI: ",
+              timestamp: 1715992993960,
+            },
+            ],
+            newMessage: prompt,
+            newFileId: null,
+            stream: false,
+          },
+          headers: {
+            'Content-Type': 'application/json',
+            "X-WP-Nonce": "56bef00553",
+          }
+        })
+        .then(response => {
+          addChatMessage(response.data.reply, 'bot');
+        })
+        .catch(error => console.error(error));
+
+        document.getElementById('chatInput').value = '';
       }
 
-      function chatMessages(message, sender) {
-        const chatContainer = document.getElementById("chatContainer");
-        const messageDiv = document.createElement("div");
-        messageDiv.classList.add("flex", "items-start", "mb-4");
-        const avatar = document.createElement("div");
+      function addChatMessage(message, sender) {
+        const chatContainer = document.getElementById('chatContainer');
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('flex', 'items-start', 'mb-4');
+        const avatar = document.createElement('div');
         avatar.classList.add('w-8', 'h-8', 'rounded-full', 'bg-gray-300', 'flex', 'items-center', 'justify-center', 'mr-2');
-        avatar.textContent = sender === 'user' ? 'U' : 'B';
+        avatar.textContent = sender === 'user' ? 'U': 'B';
         const messageContent = document.createElement('div');
         messageContent.classList.add('p-3', 'rounded-lg', 'bg-gray-200', 'dark:bg-gray-600', 'dark:text-white');
         messageContent.textContent = message;
@@ -355,138 +222,138 @@
       }
 
       function clearChat() {
-        document.getElementById("chatContainer").innerHTML = "";
+        document.getElementById('chatContainer').innerHTML = '';
       }
 
       function closeChat() {
-        document.getElementById('chatModal').classList.add("hidden");
+        document.getElementById('chatModal').classList.add('hidden');
       }
 
       function search() {
         const query = document.getElementById('searchInput').value;
         const url = 'https://spotifyapi.caliphdev.com/api/search/tracks?q=' + encodeURIComponent(query);
 
-        document.getElementById("loader").classList.remove("hidden");
+        document.getElementById('loader').classList.remove('hidden');
 
         axios.get(url)
-          .then(response => {
-            document.getElementById("loader").classList.add("hidden");
-            const resultsDiv = document.getElementById("results");
-            resultsDiv.innerHTML = "";
+        .then(response => {
+          document.getElementById('loader').classList.add('hidden');
+          const resultsDiv = document.getElementById('results');
+          resultsDiv.innerHTML = '';
 
-            response.data.forEach(song => {
-              const resultItem = document.createElement("div");
-              resultItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
+          response.data.forEach(song => {
+            const resultItem = document.createElement('div');
+            resultItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
 
-              const thumbnail = document.createElement("img");
-              thumbnail.src = song.thumbnail;
-              thumbnail.classList.add('w-24', 'h-24', 'mr-4');
-              resultItem.appendChild(thumbnail);
+            const thumbnail = document.createElement('img');
+            thumbnail.src = song.thumbnail;
+            thumbnail.classList.add('w-24', 'h-24', 'mr-4');
+            resultItem.appendChild(thumbnail);
 
-              const songInfo = document.createElement("div");
-              const title = document.createElement("h3");
-              title.textContent = song.title;
-              title.classList.add('text-lg', 'font-bold', 'mb-1');
-              songInfo.appendChild(title);
+            const songInfo = document.createElement('div');
+            const title = document.createElement('h3');
+            title.textContent = song.title;
+            title.classList.add('text-lg', 'font-bold', 'mb-1');
+            songInfo.appendChild(title);
 
-              const artist = document.createElement("p");
-              artist.textContent = `Artist: ${song.artist}`;
-              artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
-              songInfo.appendChild(artist);
+            const artist = document.createElement('p');
+            artist.textContent = `Artist: ${song.artist}`;
+            artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
+            songInfo.appendChild(artist);
 
-              const album = document.createElement("p");
-              album.textContent = `Album: ${song.album}`;
-              album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
-              songInfo.appendChild(album);
+            const album = document.createElement('p');
+            album.textContent = `Album: ${song.album}`;
+            album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
+            songInfo.appendChild(album);
 
-              const previewBtn = document.createElement('button');
-              previewBtn.innerHTML = '<i class="fas fa-play"></i> Preview';
-              previewBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300', 'mr-4');
-              previewBtn.onclick = function() {
-                openPreview(song);
-              };
-              songInfo.appendChild(previewBtn);
+            const previewBtn = document.createElement('button');
+            previewBtn.innerHTML = '<i class="fas fa-play"></i> Preview';
+            previewBtn.classList.add('bg-blue-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-blue-600', 'focus:outline-none', 'focus:ring', 'focus:border-blue-300', 'mr-4');
+            previewBtn.onclick = function() {
+              openPreview(song);
+            };
+            songInfo.appendChild(previewBtn);
 
-              resultItem.appendChild(songInfo);
-              resultsDiv.appendChild(resultItem);
-            });
-          })
-          .catch(error => {
-            document.getElementById("loader").classList.add("hidden");
-            console.error(error);
+            resultItem.appendChild(songInfo);
+            resultsDiv.appendChild(resultItem);
           });
+        })
+        .catch(error => {
+          document.getElementById('loader').classList.add('hidden');
+          console.error('Terjadi kesalahan:', error);
+        });
       }
 
       function openPreview(song) {
-        lagu = song;
-        const modal = document.getElementById("previewModal");
-        modal.classList.remove("hidden");
+        currentSong = song;
+        const modal = document.getElementById('previewModal');
+        modal.classList.remove('hidden');
 
-        document.getElementById("previewThumbnail").src = song.thumbnail;
-        document.getElementById("previewTitle").textContent = song.title;
-        document.getElementById("previewArtist").textContent = `Artist: ${song.artist}`;
-        document.getElementById("previewAlbum").textContent = `Album: ${song.album}`;
+        document.getElementById('previewThumbnail').src = song.thumbnail;
+        document.getElementById('previewTitle').textContent = song.title;
+        document.getElementById('previewArtist').textContent = `Artist: ${song.artist}`;
+        document.getElementById('previewAlbum').textContent = `Album: ${song.album}`;
 
-        const audioContainer = document.getElementById("previewAudioContainer");
+        const audioContainer = document.getElementById('previewAudioContainer');
         audioContainer.innerHTML = `
-          <audio controls class="w-full mb-4">
-            <source src="https://spotifydl.nvlgroup.my.id/download?url=${song.url}" type="audio/mp3">
-            Your browser does not support the audio element.
-          </audio>
+        <audio controls class="w-full mb-4">
+        <source src="https://spotifydl.nvlgroup.my.id/download?url=${song.url}" type="audio/mp3">
+        Your browser does not support the audio element.
+        </audio>
         `;
         document.title = `${song.title} - ${song.artist} • DannTeam`;
 
-        document.getElementById("previewDownload").href = `https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`;
+        document.getElementById('previewDownload').href = `https://spotifyapi.caliphdev.com/api/download/track?url=${song.url}`;
       }
 
       function closePreview() {
-        const modal = document.getElementById("previewModal");
-        modal.classList.add("hidden");
+        const modal = document.getElementById('previewModal');
+        modal.classList.add('hidden');
       }
 
-      function favorite() {
-        if (lagu && !favoriteSongs.some(song => song.url === lagu.url)) {
-          favoriteSongs.push(lagu);
-          localStorage.setItem("favoriteSongs", JSON.stringify(favoriteSongs));
+      function saveToFavorites() {
+        if (currentSong && !favoriteSongs.some(song => song.url === currentSong.url)) {
+          favoriteSongs.push(currentSong);
+          localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
           displayFavorites();
           closePreview();
         }
       }
 
       function displayFavorites() {
-        const favoritesDiv = document.getElementById("favorites");
-        favoritesDiv.innerHTML = "";
+        const favoritesDiv = document.getElementById('favorites');
+        favoritesDiv.innerHTML = '';
 
-        const start = (halamann - 1) * laman;
-        const end = start + laman;
+        const start = (currentPage - 1) * itemsPerPage;
+        const end = start + itemsPerPage;
         const currentFavorites = favoriteSongs.slice(start, end);
 
         currentFavorites.forEach((song, index) => {
           const favoriteItem = document.createElement('div');
           favoriteItem.classList.add('flex', 'items-center', 'bg-white', 'rounded-lg', 'shadow-md', 'p-4', 'mb-4', 'dark:bg-gray-800');
 
-          const thumbnail = document.createElement("img");
+          const thumbnail = document.createElement('img');
           thumbnail.src = song.thumbnail;
           thumbnail.classList.add('w-24', 'h-24', 'mr-4');
           favoriteItem.appendChild(thumbnail);
 
-          const songInfo = document.createElement("div");
-          const title = document.createElement("h3");
+          const songInfo = document.createElement('div');
+          const title = document.createElement('h3');
           title.textContent = song.title;
           title.classList.add('text-lg', 'font-bold', 'mb-1');
           songInfo.appendChild(title);
 
-          const artist = document.createElement("p");
+          const artist = document.createElement('p');
           artist.textContent = `Artist: ${song.artist}`;
           artist.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
           songInfo.appendChild(artist);
 
-          const album = document.createElement("p");
+          const album = document.createElement('p');
           album.textContent = `Album: ${song.album}`;
           album.classList.add('text-gray-700', 'mb-1', 'dark:text-gray-300');
           songInfo.appendChild(album);
 
-          const playBtn = document.createElement("button");
+          const playBtn = document.createElement('button');
           playBtn.innerHTML = '<i class="fas fa-play"></i>';
           playBtn.classList.add('bg-green-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-green-600', 'focus:outline-none', 'focus:ring', 'focus:border-green-300', 'mr-2');
           playBtn.onclick = function() {
@@ -494,11 +361,11 @@
           };
           songInfo.appendChild(playBtn);
 
-          const removeBtn = document.createElement("button");
+          const removeBtn = document.createElement('button');
           removeBtn.innerHTML = '<i class="fas fa-trash"></i>';
           removeBtn.classList.add('bg-red-500', 'text-white', 'px-4', 'py-2', 'rounded', 'hover:bg-red-600', 'focus:outline-none', 'focus:ring', 'focus:border-red-300');
           removeBtn.onclick = function() {
-            deleteFavorite(start + index);
+            removeFromFavorites(start + index);
           };
           songInfo.appendChild(removeBtn);
 
@@ -509,38 +376,38 @@
         renderPagination();
       }
 
-      function deleteFavorite(index) {
+      function removeFromFavorites(index) {
         Swal.fire({
-          title: "Apakah anda yakin menghapus lagu ini?",
-          icon: "warning",
+          title: 'Apakah anda yakin menghapus lagu ini?',
+          icon: 'warning',
           showCancelButton: true,
-          confirmButtonText: "Hapus",
-          cancelButtonText: "Batal"
+          confirmButtonText: 'Hapus',
+          cancelButtonText: 'Batal'
         }).then((result) => {
           if (result.isConfirmed) {
             favoriteSongs.splice(index, 1);
-            localStorage.setItem("favoriteSongs", JSON.stringify(favoriteSongs));
+            localStorage.setItem('favoriteSongs', JSON.stringify(favoriteSongs));
             displayFavorites();
           }
         });
       }
 
       function renderPagination() {
-        const paginationDiv = document.getElementById("pagination");
-        paginationDiv.innerHTML = "";
+        const paginationDiv = document.getElementById('pagination');
+        paginationDiv.innerHTML = '';
 
-        const totalPages = Math.ceil(favoriteSongs.length / laman);
+        const totalPages = Math.ceil(favoriteSongs.length / itemsPerPage);
         for (let i = 1; i <= totalPages; i++) {
-          const pageBtn = document.createElement("button");
+          const pageBtn = document.createElement('button');
           pageBtn.textContent = i;
           pageBtn.classList.add('mx-1', 'px-3', 'py-1', 'rounded', 'border', 'focus:outline-none', 'focus:ring');
-          if (i === halamann) {
+          if (i === currentPage) {
             pageBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-500');
           } else {
             pageBtn.classList.add('bg-gray-200', 'text-gray-700', 'border-gray-300', 'hover:bg-gray-300', 'hover:text-gray-700', 'hover:border-gray-400');
           }
           pageBtn.onclick = function() {
-            halamann = i;
+            currentPage = i;
             displayFavorites();
           };
           paginationDiv.appendChild(pageBtn);
@@ -571,7 +438,7 @@
             audioElements[i].pause();
           }
         }
-        if (lagu) updateNotification(lagu);
+        if (currentSong) updateNotification(currentSong);
       }, true);
 
       displayFavorites();
