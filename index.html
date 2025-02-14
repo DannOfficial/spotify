@@ -144,6 +144,7 @@
           document.getElementById('container').classList.remove('hidden');
         } else {
           alert('Captcha tidak sesuai. Silakan coba lagi.');
+          document.getElementById("captchaInput").innerHTML = ""
           generateCaptcha();
         }
       }
